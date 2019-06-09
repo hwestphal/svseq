@@ -30,18 +30,18 @@ class Track(Padget):
             return True
         if i >= self.__i * 8 and i < (self.__i + 1) * 8:
             i -= self.__i * 8
-            c, v = to_column_and_value(self.__track.volume)
+            c, v = _to_column_and_value(self.__track.volume)
             if i != c:
-                self.__track.volume = from_column_and_value(i, 3)
+                self.__track.volume = _from_column_and_value(i, 3)
             else:
-                self.__track.volume = from_column_and_value(i, (v-1) % 4)
+                self.__track.volume = _from_column_and_value(i, (v-1) % 4)
             return True
         return False
 
     def _render(self) -> None:
         self._pad.set(BUTTON_SCENE_1 + self.__i,
                       0x003 if self.__track.muted else 0x030)
-        c, v = to_column_and_value(self.__track.volume)
+        c, v = _to_column_and_value(self.__track.volume)
         for i in range(c):
             self._pad.set(i + self.__i * 8, 0x033)
         self._pad.set(c + self.__i * 8, 0x011 * v)
@@ -49,7 +49,7 @@ class Track(Padget):
             self._pad.set(i + self.__i * 8, 0x000)
 
 
-def to_column_and_value(w: float) -> Tuple[int, int]:
+def _to_column_and_value(w: float) -> Tuple[int, int]:
     v = round(max(min(1, w), 0) * 24)
     if v == 0:
         return 0, 0
@@ -57,5 +57,5 @@ def to_column_and_value(w: float) -> Tuple[int, int]:
     return v // 3, (v % 3) + 1
 
 
-def from_column_and_value(c: int, v: int) -> float:
+def _from_column_and_value(c: int, v: int) -> float:
     return (c * 3 + v) / 24
