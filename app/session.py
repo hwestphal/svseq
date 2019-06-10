@@ -1,7 +1,7 @@
 from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
 from padget import Padget
 from typing import Optional, List
-from .state import state
+from .project import project
 from .pattern import createPattern, Pattern
 
 
@@ -62,7 +62,7 @@ class Track(Padget):
 
     def __init__(self, pad: Launchpad, i: int):
         super().__init__(pad)
-        self.__track = state.tracks[i]
+        self.__track = project.tracks[i]
         self.__i = i
 
     def _buttonPressed(self, i: int) -> bool:
@@ -89,7 +89,7 @@ class Track(Padget):
 class Preset(Padget):
     def __init__(self, pad: Launchpad, i: int):
         super().__init__(pad)
-        self.__track = state.tracks[i]
+        self.__track = project.tracks[i]
         self.__i = i
 
     def _buttonPressed(self, i: int) -> bool:

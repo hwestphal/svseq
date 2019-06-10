@@ -1,11 +1,11 @@
 from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
 from padget import Padget
-from .state import state, Pattern as PatternState
+from .project import project, Pattern as ProjectPattern
 from typing import Optional
 
 
 class Pattern(Padget):
-    def __init__(self, pad: Launchpad, pattern: PatternState):
+    def __init__(self, pad: Launchpad, pattern: ProjectPattern):
         super().__init__(pad)
         self._pattern = pattern
 
@@ -44,7 +44,7 @@ class _PercussionPattern(Pattern):
 
 
 class _MelodyPattern(Pattern):
-    def __init__(self, pad: Launchpad, pattern: PatternState):
+    def __init__(self, pad: Launchpad, pattern: ProjectPattern):
         super().__init__(pad, pattern)
         self.__pressed: Optional[int] = None
 
@@ -101,7 +101,7 @@ class _MelodyPattern(Pattern):
 
 
 def createPattern(pad: Launchpad, t: int, p: int) -> Pattern:
-    track = state.tracks[t]
+    track = project.tracks[t]
     pattern = track.patterns[p]
     if track.percussion:
         return _PercussionPattern(pad, pattern)

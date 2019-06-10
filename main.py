@@ -7,12 +7,6 @@ clock = pygame.time.Clock()
 pad = Launchpad()
 
 try:
-    pad.set(BUTTON_MIXER, 0x130)
-    pad.refresh()
-    pygame.time.wait(500)
-    pad.set(BUTTON_MIXER, 0x000)
-    pad.refresh()
-
     app = App(pad)
     app.renderUi()
     pressedForExit = None

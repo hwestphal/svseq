@@ -1,10 +1,12 @@
 from mopyx import model, computed
-from typing import List
+from typing import List, Optional
 
 
 @model
-class State:
+class Project:
     def __init__(self) -> None:
+        # 40 - 240
+        self.tempo = 125
         self.tracks: List[Track] = []
         for i in range(8):
             self.tracks.append(Track(True if i % 2 else False))
@@ -29,7 +31,7 @@ class Pattern:
         self.notes: List[Note] = []
         for i in range(32):
             self.notes.append(Note())
-        # 0-8
+        # 0 - 8
         self.octave = 3
 
     @computed
@@ -47,6 +49,8 @@ class Note:
         # 0: silence
         # 1 - 108: C1 - B9
         self.tone = 0
+        # None | 0.0 - 1.0
+        self.control: List[Optional[float]] = [None] * 7
 
 
-state = State()
+project = Project()

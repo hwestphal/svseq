@@ -1,7 +1,7 @@
 from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SCENE_1
 from padget import Padget
 from typing import List, Tuple
-from .state import state
+from .project import project
 from math import modf
 
 
@@ -21,7 +21,7 @@ class Track(Padget):
 
     def __init__(self, pad: Launchpad, i: int):
         super().__init__(pad)
-        self.__track = state.tracks[i]
+        self.__track = project.tracks[i]
         self.__i = i
 
     def _buttonPressed(self, i: int) -> bool:
