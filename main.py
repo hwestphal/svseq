@@ -1,12 +1,15 @@
 import pygame.time
 from launchpad import Launchpad, BUTTON_MIXER
-from app import App
+from app import App, project
 
+
+PROJECT_FILE = 'project.json'
 
 clock = pygame.time.Clock()
 pad = Launchpad()
 
 try:
+    project.load(PROJECT_FILE)
     app = App(pad)
     app.renderUi()
     pressedForExit = None
@@ -29,3 +32,4 @@ try:
 
 finally:
     pad.close()
+    project.dump(PROJECT_FILE)

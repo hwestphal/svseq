@@ -1,5 +1,6 @@
 from mopyx import model, computed
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+import json
 
 
 @model
@@ -10,6 +11,29 @@ class Project:
         self.tracks: List[Track] = []
         for i in range(8):
             self.tracks.append(Track(True if i % 2 else False))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'tempo': self.tempo,
+            'tracks': [t.to_dict() for t in self.tracks]
+        }
+
+    def from_dict(self, d: Dict[str, Any]) -> None:
+        self.tempo = d['tempo']
+        for i in range(len(self.tracks)):
+            self.tracks[i].from_dict(d['tracks'][i])
+
+    def dump(self, name: str) -> None:
+        with open(name, 'w') as f:
+            json.dump(self.to_dict(), f)
+
+    def load(self, name: str) -> None:
+        try:
+            with open(name, 'r') as f:
+                d = json.load(f)
+                self.from_dict(d)
+        except IOError:
+            pass
 
 
 @model
@@ -23,6 +47,25 @@ class Track:
         self.patterns: List[Pattern] = []
         for i in range(8):
             self.patterns.append(Pattern())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'muted': self.muted,
+            'volume': self.volume,
+            'percussion': self.percussion,
+            'instrument': self.instrument,
+            'sequence': self.sequence,
+            'patterns': [p.to_dict() for p in self.patterns]
+        }
+
+    def from_dict(self, d: Dict[str, Any]) -> None:
+        self.muted = d['muted']
+        self.volume = d['volume']
+        self.percussion = d['percussion']
+        self.instrument = d['instrument']
+        self.sequence = d['sequence']
+        for i in range(len(self.patterns)):
+            self.patterns[i].from_dict(d['patterns'][i])
 
 
 @model
@@ -41,6 +84,17 @@ class Pattern:
                 return False
         return True
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'octave': self.octave,
+            'notes': [n.to_dict() for n in self.notes]
+        }
+
+    def from_dict(self, d: Dict[str, Any]) -> None:
+        self.octave = d['octave']
+        for i in range(len(self.notes)):
+            self.notes[i].from_dict(d['notes'][i])
+
 
 @model
 class Note:
@@ -50,7 +104,17 @@ class Note:
         # 1 - 108: C1 - B9
         self.tone = 0
         # None | 0.0 - 1.0
-        self.control: List[Optional[float]] = [None] * 7
+        self.control: List[Optional[float]] = [None] * 6
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'tone': self.tone,
+            'control': self.control
+        }
+
+    def from_dict(self, d: Dict[str, Any]) -> None:
+        self.tone = d['tone']
+        self.control = d['control']
 
 
 project = Project()
