@@ -1,4 +1,4 @@
-from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SESSION, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
+from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SESSION, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
 from padget import Padget
 from .mixer import Mixer
 from .session import Session
@@ -27,5 +27,6 @@ class App(Padget):
         self._pad.set(BUTTON_MIXER, 0x030)
         self._pad.set(BUTTON_SESSION, 0x030)
         self._pad.set(BUTTON_USER_1, 0x000)
+        self._pad.set(BUTTON_USER_2, 0x000)
         self._pad.set(BUTTON_UP, 0x000)
         self._pad.set(BUTTON_DOWN, 0x000)

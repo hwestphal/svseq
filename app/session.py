@@ -1,4 +1,4 @@
-from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
+from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
 from padget import Padget
 from typing import Optional, List
 from .project import project
@@ -13,6 +13,8 @@ class Session(Padget):
         self.__initTracks()
         self.__preset: Optional[Preset] = None
         self.__select = False
+        self.__copy = False
+        self.__copy_from: Optional[int] = None
         self.__pattern: Optional[Pattern] = None
 
     def _buttonPressed(self, i: int) -> bool:
@@ -34,22 +36,62 @@ class Session(Padget):
             return True
         if i == BUTTON_USER_1 and not self.__select:
             self.__select = True
+            self.__copy = False
             return True
-        if i < 64 and self.__select:
-            self.__tracks.clear()
-            self.__pattern = createPattern(self._pad, i // 8, i % 8)
+        if i == BUTTON_USER_2 and not self.__copy:
+            self.__copy = True
+            self.__copy_from = None
+            self.__select = False
             return True
+        if i < 64:
+            if self.__select:
+                self.__tracks.clear()
+                self.__pattern = createPattern(self._pad, i // 8, i % 8)
+                return True
+            if self.__copy:
+                self.__handleCopy(i)
+                return True
         return False
+
+    def __handleCopy(self, i: int) -> None:
+        t = project.tracks[i // 8]
+        p = t.patterns[i % 8]
+        if self.__copy_from is None:
+            if not p.empty:
+                self.__copy_from = i
+            return
+        if i == self.__copy_from:
+            # clear
+            for n in p.notes:
+                n.tone = 0
+                for c in range(len(n.control)):
+                    n.control[c] = None
+            self.__copy = False
+            return
+        st = project.tracks[self.__copy_from // 8]
+        if t.percussion != st.percussion:
+            return
+        # copy
+        sp = st.patterns[self.__copy_from % 8]
+        for m in range(len(sp.notes)):
+            p.notes[m].tone = sp.notes[m].tone
+            p.notes[m].control = sp.notes[m].control.copy()
+        self.__copy = False
 
     def _buttonReleased(self, i: int) -> bool:
         if i == BUTTON_USER_1 and self.__select:
             self.__select = False
+            return True
+        if i == BUTTON_USER_2 and self.__copy:
+            self.__copy = False
             return True
         return False
 
     def _render(self) -> None:
         self._pad.set(BUTTON_SESSION, 0x033)
         self._pad.set(BUTTON_USER_1, 0x033 if self.__select else 0x030)
+        self._pad.set(
+            BUTTON_USER_2, (0x033 if self.__copy_from is None else 0x003) if self.__copy else 0x030)
         self._pad.set(BUTTON_UP, 0x000)
         self._pad.set(BUTTON_DOWN, 0x000)
 
