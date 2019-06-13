@@ -48,8 +48,20 @@ class _MelodyPattern(Pattern):
     def __init__(self, pad: Launchpad, pattern: ProjectPattern):
         super().__init__(pad, pattern)
         self.__pressed: Optional[int] = None
+        self.__transpose = False
 
     def _buttonPressed(self, i: int) -> bool:
+        if i == BUTTON_USER_1:
+            self.__transpose = True
+            return True
+        if self.__transpose:
+            if i == BUTTON_UP:
+                self.__transpose_pattern(1)
+                return True
+            if i == BUTTON_DOWN:
+                self.__transpose_pattern(-1)
+                return True
+            return False
         if i == BUTTON_UP and self._pattern.octave > 0:
             self._pattern.octave -= 1
             return True
@@ -67,6 +79,9 @@ class _MelodyPattern(Pattern):
         return False
 
     def _buttonReleased(self, i: int) -> bool:
+        if i == BUTTON_USER_1:
+            self.__transpose = False
+            return True
         if i == self.__pressed:
             self.__pressed = None
             return True
@@ -74,9 +89,11 @@ class _MelodyPattern(Pattern):
 
     def _render(self) -> None:
         super()._render()
-        self._pad.set(BUTTON_UP, 0x030 if self._pattern.octave > 0 else 0x000)
+        self._pad.set(BUTTON_USER_1, 0x033 if self.__transpose else 0x030)
         self._pad.set(
-            BUTTON_DOWN, 0x030 if self._pattern.octave < 7 else 0x000)
+            BUTTON_UP, 0x030 if self._pattern.octave > 0 or self.__transpose else 0x000)
+        self._pad.set(
+            BUTTON_DOWN, 0x030 if self._pattern.octave < 7 or self.__transpose else 0x000)
         for i in range(32):
             if i == self.__pressed:
                 self._pad.set(i, 0x033)
@@ -99,6 +116,12 @@ class _MelodyPattern(Pattern):
 
     def __is_pressed(self, t: int) -> bool:
         return self.__pressed is not None and self._pattern.notes[self.__pressed].tone == t
+
+    def __transpose_pattern(self, i: int) -> None:
+        for n in self._pattern.notes:
+            t = n.tone
+            if t > 0:
+                n.tone = max(min(t+i, 108), 0)
 
 
 def createPattern(pad: Launchpad, t: int, p: int) -> Pattern:
