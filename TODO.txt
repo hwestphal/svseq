@@ -1,0 +1,5 @@
+- Transpose pattern
+- Controller
+- Chords / Arpeggio
+- Play pattern
+- Play session
