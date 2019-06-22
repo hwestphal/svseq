@@ -2,7 +2,7 @@ from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, 
 from padget import Padget
 from typing import Optional, List
 from .project import project
-from .pattern import createPattern, Pattern
+from .pattern import Pattern
 
 
 class Session(Padget):
@@ -46,7 +46,7 @@ class Session(Padget):
         if i < 64:
             if self.__select:
                 self.__tracks.clear()
-                self.__pattern = createPattern(self._pad, i // 8, i % 8)
+                self.__pattern = Pattern(self._pad, i // 8, i % 8)
                 return True
             if self.__copy:
                 self.__handleCopy(i)
