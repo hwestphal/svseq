@@ -143,6 +143,7 @@ class Preset(Padget):
     def _render(self) -> None:
         self._pad.set(BUTTON_SESSION, 0x003)
         self._pad.set(BUTTON_USER_1, 0x000)
+        self._pad.set(BUTTON_USER_2, 0x000)
         for i in range(8):
             self._pad.set(BUTTON_SCENE_1 + i, 0x033 if i ==
                           self.__i else 0x000)
