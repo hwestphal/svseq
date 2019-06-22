@@ -33,7 +33,7 @@ class Tempo(Padget):
             self._pad.set(BUTTON_SCENE_1 + i, 0x000)
         self._pad.set(BUTTON_UP, 0x030 if project.tempo < 240 else 0x000)
         self._pad.set(BUTTON_DOWN, 0x030 if project.tempo > 40 else 0x000)
-        for i in range(16):
+        for i in range(8):
             self._pad.set(i, 0x000)
 
         d = _DIGITS_2[project.tempo // 100]
@@ -51,7 +51,7 @@ class Tempo(Padget):
             for j in range(3):
                 self._pad.set(8 + i * 8 + j + 5, 0x003 if d[i][j] else 0x000)
 
-        for i in range(56, 64):
+        for i in range(48, 64):
             self._pad.set(i, 0x000)
 
 
