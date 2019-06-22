@@ -1,4 +1,4 @@
-from mopyx import model, computed
+from mopyx import model, computed, action
 from typing import List, Optional, Dict, Any
 import json
 
@@ -12,12 +12,14 @@ class Project:
         for i in range(8):
             self.tracks.append(Track(True if i % 2 else False))
 
-    def to_dict(self) -> Dict[str, Any]:
+    @computed
+    def dict(self) -> Dict[str, Any]:
         return {
             'tempo': self.tempo,
-            'tracks': [t.to_dict() for t in self.tracks]
+            'tracks': [t.dict for t in self.tracks]
         }
 
+    @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.tempo = d['tempo']
         for i in range(len(self.tracks)):
@@ -25,7 +27,7 @@ class Project:
 
     def dump(self, name: str) -> None:
         with open(name, 'w') as f:
-            json.dump(self.to_dict(), f)
+            json.dump(self.dict, f)
 
     def load(self, name: str) -> None:
         try:
@@ -48,16 +50,18 @@ class Track:
         for i in range(8):
             self.patterns.append(Pattern())
 
-    def to_dict(self) -> Dict[str, Any]:
+    @computed
+    def dict(self) -> Dict[str, Any]:
         return {
             'muted': self.muted,
             'volume': self.volume,
             'percussion': self.percussion,
             'instrument': self.instrument,
             'sequence': self.sequence,
-            'patterns': [p.to_dict() for p in self.patterns]
+            'patterns': [p.dict for p in self.patterns]
         }
 
+    @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.muted = d['muted']
         self.volume = d['volume']
@@ -80,16 +84,18 @@ class Pattern:
     @computed
     def empty(self) -> bool:
         for n in self.notes:
-            if n.tone:
+            if not n.empty:
                 return False
         return True
 
-    def to_dict(self) -> Dict[str, Any]:
+    @computed
+    def dict(self) -> Dict[str, Any]:
         return {
             'octave': self.octave,
-            'notes': [n.to_dict() for n in self.notes]
+            'notes': [n.dict for n in self.notes]
         }
 
+    @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.octave = d['octave']
         for i in range(len(self.notes)):
@@ -106,12 +112,23 @@ class Note:
         # None | 0.0 - 1.0
         self.control: List[Optional[float]] = [None] * 6
 
-    def to_dict(self) -> Dict[str, Any]:
+    @computed
+    def empty(self) -> bool:
+        if self.tone:
+            return False
+        for c in self.control:
+            if c is not None:
+                return False
+        return True
+
+    @computed
+    def dict(self) -> Dict[str, Any]:
         return {
             'tone': self.tone,
             'control': self.control
         }
 
+    @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.tone = d['tone']
         self.control = d['control']
