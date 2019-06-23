@@ -1,5 +1,6 @@
 from launchpad import Launchpad, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
 from project import Pattern
+from engine import engine
 from .padget import Padget
 
 from typing import Optional
@@ -21,6 +22,8 @@ class _Pattern(Padget):
                 c = 0x000
             else:
                 c = 0x030
+            if engine.uiState.playing and engine.uiState.beat % 8 * 4 == i:
+                c |= 0x100
             self._pad.set(i, c)
 
 

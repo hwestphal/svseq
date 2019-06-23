@@ -1,8 +1,10 @@
 from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
 from project import project
+from engine import engine
 from .padget import Padget
 from .pattern import Pattern
 
+from mopyx import computed
 from typing import Optional, List
 
 
@@ -100,6 +102,10 @@ class Session(Padget):
         for i in range(8):
             self.__tracks.append(Track(self._pad, i))
 
+    @computed
+    def session_mode(self) -> bool:
+        return self.__pattern is None
+
 
 class Track(Padget):
 
@@ -126,6 +132,8 @@ class Track(Padget):
                 c = 0x001 if empty else 0x003
             else:
                 c = 0x000 if empty else 0x030
+            if engine.uiState.playing and engine.uiState.pattern[self.__i] == i:
+                c |= 0x100
             self._pad.set(i + self.__i * 8, c)
 
 

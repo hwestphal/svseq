@@ -1,3 +1,4 @@
-- Chords / Arpeggio
-- Play pattern
-- Play session
+# UI
+- Chords
+- Arpeggio
+- Portamento

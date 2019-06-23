@@ -1,5 +1,6 @@
-from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
+from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN, BUTTON_RIGHT
 from project import project
+from engine import engine
 from .padget import Padget
 from .notes import PercussionPattern, MelodyPattern
 from .controller import Controller
@@ -13,6 +14,8 @@ class Pattern(Padget):
         self.__percussion = track.percussion
         self.__display = self.__create_notes()
         self.__scene = 0
+        self.__tn = t
+        self.__pn = p
 
     def _buttonPressed(self, i: int) -> bool:
         if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
@@ -23,6 +26,9 @@ class Pattern(Padget):
                 else:
                     self.__display = Controller(self._pad, self.__pattern, i-2)
                 self.__scene = i
+            return True
+        if i == BUTTON_RIGHT:
+            engine.startOrStopPattern(self.__tn, self.__pn)
             return True
         return False
 

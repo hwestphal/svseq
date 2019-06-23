@@ -1,5 +1,6 @@
 from launchpad import Launchpad, BUTTON_SCENE_1
 from project import Pattern
+from engine import engine
 from .padget import Padget
 
 from typing import Optional, Tuple
@@ -52,6 +53,8 @@ class Controller(Padget):
                 c = 0x030
             else:
                 c = 0x000
+            if engine.uiState.playing and engine.uiState.beat % 8 * 4 == i:
+                c |= 0x100
             self._pad.set(i, c)
         if self.__pressed is not None:
             cv = self.__pattern.notes[self.__pressed].control[self.__cn]
