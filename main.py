@@ -1,6 +1,8 @@
+from ui import App
+from project import project
+
 import pygame.time
 from launchpad import Launchpad, BUTTON_MIXER
-from app import App, project
 
 
 PROJECT_FILE = 'project.json'

@@ -1,6 +1,7 @@
 from launchpad import Launchpad, BUTTON_SCENE_1
-from padget import Padget
-from .project import Pattern
+from project import Pattern
+from .padget import Padget
+
 from typing import Optional, Tuple
 
 

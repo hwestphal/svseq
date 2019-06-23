@@ -1,5 +1,6 @@
-from mopyx import action, render, model
 from launchpad import Launchpad
+
+from mopyx import action, render, model
 from typing import Callable, Any
 
 

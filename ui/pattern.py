@@ -1,6 +1,6 @@
 from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
-from padget import Padget
-from .project import project
+from project import project
+from .padget import Padget
 from .notes import PercussionPattern, MelodyPattern
 from .controller import Controller
 

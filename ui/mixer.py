@@ -1,7 +1,8 @@
 from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SCENE_1
-from padget import Padget
+from project import project
+from .padget import Padget
+
 from typing import List, Tuple
-from .project import project
 from math import modf
 
 

@@ -1,7 +1,8 @@
 from launchpad import Launchpad, BUTTON_LEFT, BUTTON_SCENE_1, BUTTON_UP, BUTTON_DOWN
-from padget import Padget
+from project import project
+from .padget import Padget
+
 from typing import List
-from .project import project
 
 
 class Tempo(Padget):

@@ -1,8 +1,9 @@
 from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SESSION, BUTTON_LEFT, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
-from padget import Padget
+from .padget import Padget
 from .mixer import Mixer
 from .session import Session
 from .tempo import Tempo
+
 from typing import Optional
 
 
