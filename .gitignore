@@ -2,3 +2,7 @@
 __pycache__/
 .mypy_cache/
 /project.json
+/audio/build
+*.pyd
+*.dll
+*.so
