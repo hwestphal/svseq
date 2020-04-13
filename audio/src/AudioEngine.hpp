@@ -35,13 +35,10 @@ public:
   AudioEngine(Link& link);
   void startPlaying();
   void stopPlaying();
-  bool isPlaying() const;
-  double beatTime() const;
   void setTempo(double tempo);
   double quantum() const;
   void setQuantum(double quantum);
-  bool isStartStopSyncEnabled() const;
-  void setStartStopSyncEnabled(bool enabled);
+  void setLatency(std::chrono::microseconds latency);
 
 private:
   struct EngineData
@@ -50,27 +47,28 @@ private:
     bool requestStart;
     bool requestStop;
     double quantum;
-    bool startStopSyncOn;
+    std::chrono::microseconds latency;
   };
 
   void setBufferSize(std::size_t size);
   void setSampleRate(double sampleRate);
   EngineData pullEngineData();
+  void audioCallback(const std::chrono::microseconds hostTime, std::size_t numSamples);
+
   void renderMetronomeIntoBuffer(Link::SessionState sessionState,
     double quantum,
     std::chrono::microseconds beginHostTime,
     std::size_t numSamples);
-  void audioCallback(const std::chrono::microseconds hostTime, std::size_t numSamples);
 
   Link& mLink;
   double mSampleRate;
   std::chrono::microseconds mOutputLatency;
   std::vector<double> mBuffer;
   EngineData mSharedEngineData;
-  EngineData mLockfreeEngineData;
-  std::chrono::microseconds mTimeAtLastClick;
   bool mIsPlaying;
   std::mutex mEngineDataGuard;
+
+  std::chrono::microseconds mTimeAtLastClick;
 
   friend class AudioPlatform;
 };

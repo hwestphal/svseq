@@ -34,10 +34,9 @@ AudioEngine::AudioEngine(Link& link)
   : mLink(link)
   , mSampleRate(44100.)
   , mOutputLatency(0)
-  , mSharedEngineData({0., false, false, 4., false})
-  , mLockfreeEngineData(mSharedEngineData)
-  , mTimeAtLastClick{}
+  , mSharedEngineData({0., false, false, 4., std::chrono::microseconds(0)})
   , mIsPlaying(false)
+  , mTimeAtLastClick{}
 {
 }
 
@@ -51,17 +50,6 @@ void AudioEngine::stopPlaying()
 {
   std::lock_guard<std::mutex> lock(mEngineDataGuard);
   mSharedEngineData.requestStop = true;
-}
-
-bool AudioEngine::isPlaying() const
-{
-  return mLink.captureAppSessionState().isPlaying();
-}
-
-double AudioEngine::beatTime() const
-{
-  const auto sessionState = mLink.captureAppSessionState();
-  return sessionState.beatAtTime(mLink.clock().micros(), mSharedEngineData.quantum);
 }
 
 void AudioEngine::setTempo(double tempo)
@@ -81,14 +69,10 @@ void AudioEngine::setQuantum(double quantum)
   mSharedEngineData.quantum = quantum;
 }
 
-bool AudioEngine::isStartStopSyncEnabled() const
+void AudioEngine::setLatency(std::chrono::microseconds latency)
 {
-  return mLink.isStartStopSyncEnabled();
-}
-
-void AudioEngine::setStartStopSyncEnabled(const bool enabled)
-{
-  mLink.enableStartStopSync(enabled);
+  std::lock_guard<std::mutex> lock(mEngineDataGuard);
+  mSharedEngineData.latency = latency;
 }
 
 void AudioEngine::setBufferSize(std::size_t size)
@@ -108,17 +92,19 @@ AudioEngine::EngineData AudioEngine::pullEngineData()
   {
     engineData.requestedTempo = mSharedEngineData.requestedTempo;
     mSharedEngineData.requestedTempo = 0;
+
     engineData.requestStart = mSharedEngineData.requestStart;
     mSharedEngineData.requestStart = false;
+
     engineData.requestStop = mSharedEngineData.requestStop;
     mSharedEngineData.requestStop = false;
 
-    mLockfreeEngineData.quantum = mSharedEngineData.quantum;
-    mLockfreeEngineData.startStopSyncOn = mSharedEngineData.startStopSyncOn;
+    engineData.quantum = mSharedEngineData.quantum;
+
+    engineData.latency = mSharedEngineData.latency;
 
     mEngineDataGuard.unlock();
   }
-  engineData.quantum = mLockfreeEngineData.quantum;
 
   return engineData;
 }
@@ -226,7 +212,7 @@ void AudioEngine::audioCallback(
   {
     // As long as the engine is playing, generate metronome clicks in
     // the buffer at the appropriate beats.
-    renderMetronomeIntoBuffer(sessionState, engineData.quantum, hostTime, numSamples);
+    renderMetronomeIntoBuffer(sessionState, engineData.quantum, hostTime + engineData.latency, numSamples);
   }
 }
 

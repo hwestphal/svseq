@@ -3,6 +3,7 @@ from audio.audio_engine import Engine as AudioEngine
 
 from mopyx import model, action, render
 from math import floor
+from datetime import timedelta
 from typing import List, Optional
 
 
@@ -11,8 +12,10 @@ class Engine:
         self.uiState = UiState()
         self.playing = False
         self.pattern: List[Optional[int]] = [None] * 8
-        self.audioEngine = AudioEngine(project.tempo, 8)
+        self.audioEngine = AudioEngine(
+            project.tempo, 8, timedelta(milliseconds=project.latency * 5))
         self.__tempo_changed()
+        self.__latency_changed()
 
     def startOrStopPattern(self, track: int, pattern: int) -> None:
         if not self.playing:
@@ -62,6 +65,11 @@ class Engine:
     def __tempo_changed(self) -> None:
         self.audioEngine.setTempo(project.tempo)
         self.engineTempo = project.tempo
+
+    @render
+    def __latency_changed(self) -> None:
+        self.audioEngine.setLatency(
+            timedelta(milliseconds=project.latency * 5))
 
 
 @model

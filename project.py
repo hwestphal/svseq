@@ -8,6 +8,8 @@ class Project:
     def __init__(self) -> None:
         # 40 - 240
         self.tempo = 125
+        # -48 - 48
+        self.latency = 0
         self.tracks: List[Track] = []
         for i in range(8):
             self.tracks.append(Track(True if i % 2 else False))
@@ -16,12 +18,14 @@ class Project:
     def dict(self) -> Dict[str, Any]:
         return {
             'tempo': self.tempo,
+            'latency': self.latency,
             'tracks': [t.dict for t in self.tracks]
         }
 
     @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.tempo = d['tempo']
+        self.latency = d['latency']
         for i in range(len(self.tracks)):
             self.tracks[i].from_dict(d['tracks'][i])
 
