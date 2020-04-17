@@ -18,6 +18,7 @@
  */
 
 #include "AudioEngine.hpp"
+#include <sunvox.h>
 
 // Make sure to define this before <cmath> is included for Windows
 #ifdef LINK_PLATFORM_WINDOWS
@@ -30,190 +31,159 @@ namespace ableton
 namespace linkaudio
 {
 
-AudioEngine::AudioEngine(Link& link)
-  : mLink(link)
-  , mSampleRate(44100.)
-  , mOutputLatency(0)
-  , mSharedEngineData({0., false, false, 4., std::chrono::microseconds(0)})
-  , mIsPlaying(false)
-  , mTimeAtLastClick{}
+AudioEngine::AudioEngine(Link &link)
+    : mLink(link), mSampleRate(44100.), mOutputLatency(0), mSharedEngineData({0., false, false, 4., std::chrono::microseconds(0)}), mIsPlaying(false)
 {
 }
 
 void AudioEngine::startPlaying()
 {
-  std::lock_guard<std::mutex> lock(mEngineDataGuard);
-  mSharedEngineData.requestStart = true;
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.requestStart = true;
 }
 
 void AudioEngine::stopPlaying()
 {
-  std::lock_guard<std::mutex> lock(mEngineDataGuard);
-  mSharedEngineData.requestStop = true;
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.requestStop = true;
 }
 
 void AudioEngine::setTempo(double tempo)
 {
-  std::lock_guard<std::mutex> lock(mEngineDataGuard);
-  mSharedEngineData.requestedTempo = tempo;
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.requestedTempo = tempo;
 }
 
 double AudioEngine::quantum() const
 {
-  return mSharedEngineData.quantum;
+    return mSharedEngineData.quantum;
 }
 
 void AudioEngine::setQuantum(double quantum)
 {
-  std::lock_guard<std::mutex> lock(mEngineDataGuard);
-  mSharedEngineData.quantum = quantum;
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.quantum = quantum;
 }
 
 void AudioEngine::setLatency(std::chrono::microseconds latency)
 {
-  std::lock_guard<std::mutex> lock(mEngineDataGuard);
-  mSharedEngineData.latency = latency;
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.latency = latency;
 }
 
-void AudioEngine::setBufferSize(std::size_t size)
+void AudioEngine::setBufferSize(unsigned long size)
 {
-  mBuffer = std::vector<double>(size, 0.);
+    mBufferSize = size;
 }
 
 void AudioEngine::setSampleRate(double sampleRate)
 {
-  mSampleRate = sampleRate;
+    mSampleRate = sampleRate;
 }
 
 AudioEngine::EngineData AudioEngine::pullEngineData()
 {
-  auto engineData = EngineData{};
-  if (mEngineDataGuard.try_lock())
-  {
-    engineData.requestedTempo = mSharedEngineData.requestedTempo;
-    mSharedEngineData.requestedTempo = 0;
+    auto engineData = EngineData{};
+    if (mEngineDataGuard.try_lock())
+    {
+        engineData.requestedTempo = mSharedEngineData.requestedTempo;
+        mSharedEngineData.requestedTempo = 0;
 
-    engineData.requestStart = mSharedEngineData.requestStart;
-    mSharedEngineData.requestStart = false;
+        engineData.requestStart = mSharedEngineData.requestStart;
+        mSharedEngineData.requestStart = false;
 
-    engineData.requestStop = mSharedEngineData.requestStop;
-    mSharedEngineData.requestStop = false;
+        engineData.requestStop = mSharedEngineData.requestStop;
+        mSharedEngineData.requestStop = false;
 
-    engineData.quantum = mSharedEngineData.quantum;
+        engineData.quantum = mSharedEngineData.quantum;
 
-    engineData.latency = mSharedEngineData.latency;
+        engineData.latency = mSharedEngineData.latency;
 
-    mEngineDataGuard.unlock();
-  }
+        mEngineDataGuard.unlock();
+    }
 
-  return engineData;
+    return engineData;
 }
 
-void AudioEngine::renderMetronomeIntoBuffer(const Link::SessionState sessionState,
-  const double quantum,
-  const std::chrono::microseconds beginHostTime,
-  const std::size_t numSamples)
+void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
+                                     const double quantum,
+                                     const std::chrono::microseconds beginHostTime,
+                                     const uint32_t beginTicks,
+                                     const std::size_t numSamples)
 {
-  using namespace std::chrono;
+    using namespace std::chrono;
 
-  // Metronome frequencies
-  static const double highTone = 1567.98;
-  static const double lowTone = 1108.73;
-  // 100ms click duration
-  static const auto clickDuration = duration<double>{0.1};
+    const auto microsPerSample = 1e6 / mSampleRate;
+    const auto ticksPerSecond = sv_get_ticks_per_second();
+    const auto maxTime = beginHostTime + microseconds(llround(numSamples * microsPerSample));
 
-  // The number of microseconds that elapse between samples
-  const auto microsPerSample = 1e6 / mSampleRate;
-
-  for (std::size_t i = 0; i < numSamples; ++i)
-  {
-    double amplitude = 0.;
-    // Compute the host time for this sample and the last.
-    const auto hostTime = beginHostTime + microseconds(llround(i * microsPerSample));
-    const auto lastSampleHostTime = hostTime - microseconds(llround(microsPerSample));
-
-    // Only make sound for positive beat magnitudes. Negative beat
-    // magnitudes are count-in beats.
-    if (sessionState.beatAtTime(hostTime, quantum) >= 0.)
+    long long beat = std::max(0., sessionState.beatAtTime(beginHostTime, quantum) * 4.);
+    for (;;)
     {
-      // If the phase wraps around between the last sample and the
-      // current one with respect to a 1 beat quantum, then a click
-      // should occur.
-      if (sessionState.phaseAtTime(hostTime, 1)
-          < sessionState.phaseAtTime(lastSampleHostTime, 1))
-      {
-        mTimeAtLastClick = hostTime;
-      }
-
-      const auto secondsAfterClick =
-        duration_cast<duration<double>>(hostTime - mTimeAtLastClick);
-
-      // If we're within the click duration of the last beat, render
-      // the click tone into this sample
-      if (secondsAfterClick < clickDuration)
-      {
-        // If the phase of the last beat with respect to the current
-        // quantum was zero, then it was at a quantum boundary and we
-        // want to use the high tone. For other beats within the
-        // quantum, use the low tone.
-        const auto freq =
-          floor(sessionState.phaseAtTime(hostTime, quantum)) == 0 ? highTone : lowTone;
-
-        // Simple cosine synth
-        amplitude = cos(2 * M_PI * secondsAfterClick.count() * freq)
-                    * (1 - sin(5 * M_PI * secondsAfterClick.count()));
-      }
+        const auto timeAtBeat = sessionState.timeAtBeat(beat / 4., quantum);
+        if (timeAtBeat >= maxTime)
+        {
+            break;
+        }
+        if (timeAtBeat >= beginHostTime)
+        {
+            sv_set_event_t(0, 1, beginTicks + round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6));
+            if ((beat % 32) == 0)
+            {
+                sv_send_event(0, 31, 45, 0, 2, 0, 0);
+            }
+            sv_send_event(0, 0, 40, (beat % 4) == 0 ? 0 : 16, 2, 0, 0);
+        }
+        beat += 1;
     }
-    mBuffer[i] = amplitude;
-  }
 }
 
 void AudioEngine::audioCallback(
-  const std::chrono::microseconds hostTime, const std::size_t numSamples)
+    const std::chrono::microseconds time, const std::size_t numSamples, float *buffer)
 {
-  const auto engineData = pullEngineData();
+    const auto engineData = pullEngineData();
 
-  auto sessionState = mLink.captureAudioSessionState();
+    const auto hostTime = time + engineData.latency;
 
-  // Clear the buffer
-  std::fill(mBuffer.begin(), mBuffer.end(), 0);
+    auto sessionState = mLink.captureAudioSessionState();
 
-  if (engineData.requestStart)
-  {
-    sessionState.setIsPlaying(true, hostTime);
-  }
+    if (engineData.requestStart)
+    {
+        sessionState.setIsPlaying(true, hostTime);
+    }
 
-  if (engineData.requestStop)
-  {
-    sessionState.setIsPlaying(false, hostTime);
-  }
+    if (engineData.requestStop)
+    {
+        sessionState.setIsPlaying(false, hostTime);
+    }
 
-  if (!mIsPlaying && sessionState.isPlaying())
-  {
-    // Reset the timeline so that beat 0 corresponds to the time when transport starts
-    sessionState.requestBeatAtStartPlayingTime(0, engineData.quantum);
-    mIsPlaying = true;
-  }
-  else if (mIsPlaying && !sessionState.isPlaying())
-  {
-    mIsPlaying = false;
-  }
+    if (!mIsPlaying && sessionState.isPlaying())
+    {
+        // Reset the timeline so that beat 0 corresponds to the time when transport starts
+        sessionState.requestBeatAtStartPlayingTime(0, engineData.quantum);
+        mIsPlaying = true;
+    }
+    else if (mIsPlaying && !sessionState.isPlaying())
+    {
+        mIsPlaying = false;
+    }
 
-  if (engineData.requestedTempo > 0)
-  {
-    // Set the newly requested tempo from the beginning of this buffer
-    sessionState.setTempo(engineData.requestedTempo, hostTime);
-  }
+    if (engineData.requestedTempo > 0)
+    {
+        // Set the newly requested tempo from the beginning of this buffer
+        sessionState.setTempo(engineData.requestedTempo, hostTime);
+    }
 
-  // Timeline modifications are complete, commit the results
-  mLink.commitAudioSessionState(sessionState);
+    // Timeline modifications are complete, commit the results
+    mLink.commitAudioSessionState(sessionState);
 
-  if (mIsPlaying)
-  {
-    // As long as the engine is playing, generate metronome clicks in
-    // the buffer at the appropriate beats.
-    renderMetronomeIntoBuffer(sessionState, engineData.quantum, hostTime + engineData.latency, numSamples);
-  }
+    const uint32_t ticks = sv_get_ticks();
+    if (mIsPlaying)
+    {
+        // As long as the engine is playing, generate sunvox events at the appropriate beats.
+        createSunvoxEvents(sessionState, engineData.quantum, hostTime, ticks, numSamples);
+    }
+    sv_audio_callback(buffer, numSamples, 0, ticks);
 }
 
 } // namespace linkaudio

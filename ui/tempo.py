@@ -26,7 +26,7 @@ class Tempo(Padget):
         if i == BUTTON_SCENE_1+6 and project.latency < 48:
             project.latency += 1
             return True
-        if i == BUTTON_SCENE_1+7 and project.latency > -48:
+        if i == BUTTON_SCENE_1+7 and project.latency > 0:
             project.latency -= 1
             return True
         return False
@@ -39,7 +39,7 @@ class Tempo(Padget):
         self._pad.set(BUTTON_SCENE_1 + 6,
                       0x030 if project.latency < 48 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 7,
-                      0x030 if project.latency > -48 else 0x000)
+                      0x030 if project.latency > 0 else 0x000)
         for i in range(2, 6):
             self._pad.set(BUTTON_SCENE_1 + i, 0x000)
         self._pad.set(BUTTON_UP, 0x030 if project.tempo < 240 else 0x000)
@@ -65,14 +65,13 @@ class Tempo(Padget):
 
         c, v = _to_column_and_value(project.latency)
         for i in range(c):
-            self._pad.set(i + 48, 0x030 if project.latency >= 0 else 0x003)
-        self._pad.set(c + 48, (0x010 if project.latency >= 0 else 0x001) * v)
+            self._pad.set(i + 48, 0x033)
+        self._pad.set(c + 48, 0x011 * v)
         for i in range(c+1, 16):
             self._pad.set(i + 48, 0x000)
 
 
-def _to_column_and_value(w: int) -> Tuple[int, int]:
-    v = min(48, abs(w))
+def _to_column_and_value(v: int) -> Tuple[int, int]:
     if v == 0:
         return 0, 0
     v -= 1

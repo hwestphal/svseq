@@ -32,47 +32,46 @@ namespace linkaudio
 class AudioEngine
 {
 public:
-  AudioEngine(Link& link);
-  void startPlaying();
-  void stopPlaying();
-  void setTempo(double tempo);
-  double quantum() const;
-  void setQuantum(double quantum);
-  void setLatency(std::chrono::microseconds latency);
+    AudioEngine(Link &link);
+    void startPlaying();
+    void stopPlaying();
+    void setTempo(double tempo);
+    double quantum() const;
+    void setQuantum(double quantum);
+    void setLatency(std::chrono::microseconds latency);
 
 private:
-  struct EngineData
-  {
-    double requestedTempo;
-    bool requestStart;
-    bool requestStop;
-    double quantum;
-    std::chrono::microseconds latency;
-  };
+    struct EngineData
+    {
+        double requestedTempo;
+        bool requestStart;
+        bool requestStop;
+        double quantum;
+        std::chrono::microseconds latency;
+    };
 
-  void setBufferSize(std::size_t size);
-  void setSampleRate(double sampleRate);
-  EngineData pullEngineData();
-  void audioCallback(const std::chrono::microseconds hostTime, std::size_t numSamples);
+    void setBufferSize(unsigned long size);
+    void setSampleRate(double sampleRate);
+    EngineData pullEngineData();
+    void audioCallback(std::chrono::microseconds hostTime,
+                       std::size_t numSamples,
+                       float *buffer);
+    void createSunvoxEvents(Link::SessionState sessionState,
+                            double quantum,
+                            std::chrono::microseconds beginHostTime,
+                            uint32_t beginTicks,
+                            std::size_t numSamples);
 
-  void renderMetronomeIntoBuffer(Link::SessionState sessionState,
-    double quantum,
-    std::chrono::microseconds beginHostTime,
-    std::size_t numSamples);
+    Link &mLink;
+    double mSampleRate;
+    std::chrono::microseconds mOutputLatency;
+    unsigned long mBufferSize;
+    EngineData mSharedEngineData;
+    bool mIsPlaying;
+    std::mutex mEngineDataGuard;
 
-  Link& mLink;
-  double mSampleRate;
-  std::chrono::microseconds mOutputLatency;
-  std::vector<double> mBuffer;
-  EngineData mSharedEngineData;
-  bool mIsPlaying;
-  std::mutex mEngineDataGuard;
-
-  std::chrono::microseconds mTimeAtLastClick;
-
-  friend class AudioPlatform;
+    friend class AudioPlatform;
 };
-
 
 } // namespace linkaudio
 } // namespace ableton

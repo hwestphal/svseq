@@ -34,7 +34,7 @@ if(WIN32 AND MSVC)
     message(STATUS "Copying sunvox DLL (x86)")
     set(sunvox_dll "modules/sunvox_dll/windows/lib_x86/sunvox.dll")
   endif()
-  configure_file(${sunvox_dll} ${PROJECT_SOURCE_DIR}/sunvox.dll COPYONLY)
+  configure_file(${sunvox_dll} ${PROJECT_SOURCE_DIR}/../sunvox.dll COPYONLY)
 
 #elseif("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
 

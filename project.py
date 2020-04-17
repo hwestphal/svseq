@@ -8,7 +8,7 @@ class Project:
     def __init__(self) -> None:
         # 40 - 240
         self.tempo = 125
-        # -48 - 48
+        # 0 - 48
         self.latency = 0
         self.tracks: List[Track] = []
         for i in range(8):

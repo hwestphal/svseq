@@ -26,130 +26,123 @@ namespace ableton
 namespace linkaudio
 {
 
-AudioPlatform::AudioPlatform(Link& link)
-  : mEngine(link)
-  , mSampleTime(0.)
+AudioPlatform::AudioPlatform(Link &link)
+    : mEngine(link), mSampleTime(0.)
 {
-  mEngine.setSampleRate(44100.);
-  mEngine.setBufferSize(512);
-  initialize();
-  start();
+    mEngine.setSampleRate(44100.);
+    mEngine.setBufferSize(512);
+    initialize();
+    start();
 }
 
 AudioPlatform::~AudioPlatform()
 {
-  stop();
-  uninitialize();
+    stop();
+    uninitialize();
 }
 
-int AudioPlatform::audioCallback(const void* /*inputBuffer*/,
-  void* outputBuffer,
-  unsigned long inNumFrames,
-  const PaStreamCallbackTimeInfo* /*timeInfo*/,
-  PaStreamCallbackFlags /*statusFlags*/,
-  void* userData)
+int AudioPlatform::audioCallback(const void * /*inputBuffer*/,
+                                 void *outputBuffer,
+                                 unsigned long inNumFrames,
+                                 const PaStreamCallbackTimeInfo * /*timeInfo*/,
+                                 PaStreamCallbackFlags /*statusFlags*/,
+                                 void *userData)
 {
-  using namespace std::chrono;
-  float* buffer = static_cast<float*>(outputBuffer);
-  AudioPlatform& platform = *static_cast<AudioPlatform*>(userData);
-  AudioEngine& engine = platform.mEngine;
+    using namespace std::chrono;
+    float *buffer = static_cast<float *>(outputBuffer);
+    AudioPlatform &platform = *static_cast<AudioPlatform *>(userData);
+    AudioEngine &engine = platform.mEngine;
 
-  const auto hostTime =
-    platform.mHostTimeFilter.sampleTimeToHostTime(platform.mSampleTime);
+    const auto hostTime =
+        platform.mHostTimeFilter.sampleTimeToHostTime(platform.mSampleTime);
 
-  platform.mSampleTime += inNumFrames;
+    platform.mSampleTime += inNumFrames;
 
-  const auto bufferBeginAtOutput = hostTime + engine.mOutputLatency;
+    const auto bufferBeginAtOutput = hostTime + engine.mOutputLatency;
 
-  engine.audioCallback(bufferBeginAtOutput, inNumFrames);
+    engine.audioCallback(bufferBeginAtOutput, inNumFrames, buffer);
 
-  for (unsigned long i = 0; i < inNumFrames; ++i)
-  {
-    buffer[i * 2] = static_cast<float>(engine.mBuffer[i]);
-    buffer[i * 2 + 1] = static_cast<float>(engine.mBuffer[i]);
-  }
-
-  return paContinue;
+    return paContinue;
 }
 
 void AudioPlatform::initialize()
 {
-  PaError result = Pa_Initialize();
-  if (result)
-  {
-    std::cerr << "Could not initialize Audio Engine. " << result << std::endl;
-    std::terminate();
-  };
+    PaError result = Pa_Initialize();
+    if (result)
+    {
+        std::cerr << "Could not initialize Audio Engine. " << result << std::endl;
+        std::terminate();
+    };
 
-  PaStreamParameters outputParameters;
-  outputParameters.device = Pa_GetDefaultOutputDevice();
-  if (outputParameters.device == paNoDevice)
-  {
-    std::cerr << "Could not get Audio Device. " << std::endl;
-    std::terminate();
-  }
+    PaStreamParameters outputParameters;
+    outputParameters.device = Pa_GetDefaultOutputDevice();
+    if (outputParameters.device == paNoDevice)
+    {
+        std::cerr << "Could not get Audio Device. " << std::endl;
+        std::terminate();
+    }
 
-  outputParameters.channelCount = 2;
-  outputParameters.sampleFormat = paFloat32;
-  outputParameters.suggestedLatency =
-    Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
-  outputParameters.hostApiSpecificStreamInfo = nullptr;
-  mEngine.mOutputLatency =
-    std::chrono::microseconds(llround(outputParameters.suggestedLatency * 1.0e6));
-  result = Pa_OpenStream(&pStream, nullptr, &outputParameters, mEngine.mSampleRate,
-    mEngine.mBuffer.size(), paClipOff, &audioCallback, this);
+    outputParameters.channelCount = 2;
+    outputParameters.sampleFormat = paFloat32;
+    outputParameters.suggestedLatency =
+        Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = nullptr;
+    mEngine.mOutputLatency =
+        std::chrono::microseconds(llround(outputParameters.suggestedLatency * 1.0e6));
+    result = Pa_OpenStream(&pStream, nullptr, &outputParameters, mEngine.mSampleRate,
+                           mEngine.mBufferSize, paClipOff, &audioCallback, this);
 
-  if (result)
-  {
-    std::cerr << "Could not open stream. " << result << std::endl;
-    std::terminate();
-  }
+    if (result)
+    {
+        std::cerr << "Could not open stream. " << result << std::endl;
+        std::terminate();
+    }
 
-  if (!pStream)
-  {
-    std::cerr << "No valid audio stream." << std::endl;
-    std::terminate();
-  }
+    if (!pStream)
+    {
+        std::cerr << "No valid audio stream." << std::endl;
+        std::terminate();
+    }
 }
 
 void AudioPlatform::uninitialize()
 {
-  PaError result = Pa_CloseStream(pStream);
-  if (result)
-  {
-    std::cerr << "Could not close Audio Stream. " << result << std::endl;
-  }
-  Pa_Terminate();
+    PaError result = Pa_CloseStream(pStream);
+    if (result)
+    {
+        std::cerr << "Could not close Audio Stream. " << result << std::endl;
+    }
+    Pa_Terminate();
 
-  if (!pStream)
-  {
-    std::cerr << "No valid audio stream." << std::endl;
-    std::terminate();
-  }
+    if (!pStream)
+    {
+        std::cerr << "No valid audio stream." << std::endl;
+        std::terminate();
+    }
 }
 
 void AudioPlatform::start()
 {
-  PaError result = Pa_StartStream(pStream);
-  if (result)
-  {
-    std::cerr << "Could not start Audio Stream. " << result << std::endl;
-  }
+    PaError result = Pa_StartStream(pStream);
+    if (result)
+    {
+        std::cerr << "Could not start Audio Stream. " << result << std::endl;
+    }
 }
 
 void AudioPlatform::stop()
 {
-  if (pStream == nullptr)
-  {
-    return;
-  }
+    if (pStream == nullptr)
+    {
+        return;
+    }
 
-  PaError result = Pa_StopStream(pStream);
-  if (result)
-  {
-    std::cerr << "Could not stop Audio Stream. " << result << std::endl;
-    std::terminate();
-  }
+    PaError result = Pa_StopStream(pStream);
+    if (result)
+    {
+        std::cerr << "Could not stop Audio Stream. " << result << std::endl;
+        std::terminate();
+    }
 }
 
 } // namespace linkaudio

@@ -32,27 +32,27 @@ namespace linkaudio
 class AudioPlatform
 {
 public:
-  AudioPlatform(Link& link);
-  ~AudioPlatform();
+    AudioPlatform(Link &link);
+    ~AudioPlatform();
 
-  AudioEngine mEngine;
+    AudioEngine mEngine;
 
 private:
-  static int audioCallback(const void* inputBuffer,
-    void* outputBuffer,
-    unsigned long inNumFrames,
-    const PaStreamCallbackTimeInfo* timeInfo,
-    PaStreamCallbackFlags statusFlags,
-    void* userData);
+    static int audioCallback(const void *inputBuffer,
+                             void *outputBuffer,
+                             unsigned long inNumFrames,
+                             const PaStreamCallbackTimeInfo *timeInfo,
+                             PaStreamCallbackFlags statusFlags,
+                             void *userData);
 
-  void initialize();
-  void uninitialize();
-  void start();
-  void stop();
+    void initialize();
+    void uninitialize();
+    void start();
+    void stop();
 
-  link::HostTimeFilter<link::platform::Clock> mHostTimeFilter;
-  double mSampleTime;
-  PaStream* pStream;
+    link::HostTimeFilter<link::platform::Clock> mHostTimeFilter;
+    double mSampleTime;
+    PaStream *pStream;
 };
 
 } // namespace linkaudio

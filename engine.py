@@ -1,10 +1,14 @@
 from project import project
+from audio import audio_engine
 from audio.audio_engine import Engine as AudioEngine
 
 from mopyx import model, action, render
 from math import floor
 from datetime import timedelta
 from typing import List, Optional
+
+
+audio_engine.init_sunvox('svseq.sunvox')
 
 
 class Engine:
