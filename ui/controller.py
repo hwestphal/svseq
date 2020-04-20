@@ -40,7 +40,7 @@ class Controller(Padget):
         return False
 
     def _render(self) -> None:
-        self._pad.set(BUTTON_SCENE_1 + 2 + self.__cn, 0x033)
+        self._pad.set(BUTTON_SCENE_1 + 3 + self.__cn, 0x033)
         notes = self.__pattern.notes
         for i in range(32):
             tone = notes[i].tone

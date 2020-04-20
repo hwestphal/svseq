@@ -14,6 +14,7 @@ pad = Launchpad()
 
 try:
     project.load(PROJECT_FILE)
+    clock.tick(1)
     app = App(pad)
     app.renderUi()
     pressedForExit = None

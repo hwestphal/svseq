@@ -114,7 +114,7 @@ class Note:
         # 1 - 108: C1 - B9
         self.tone = 0
         # None | 0.0 - 1.0
-        self.control: List[Optional[float]] = [None] * 6
+        self.control: List[Optional[float]] = [None] * 5
 
     @computed
     def empty(self) -> bool:

@@ -20,11 +20,11 @@ class Pattern(Padget):
     def _buttonPressed(self, i: int) -> bool:
         if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
             i -= BUTTON_SCENE_1
-            if i != self.__scene and i != 1:
+            if i != self.__scene and (i != 1 or i != 2):
                 if i == 0:
                     self.__display = self.__create_notes()
                 else:
-                    self.__display = Controller(self._pad, self.__pattern, i-2)
+                    self.__display = Controller(self._pad, self.__pattern, i-3)
                 self.__scene = i
             return True
         if i == BUTTON_RIGHT:
@@ -40,7 +40,8 @@ class Pattern(Padget):
         self._pad.set(BUTTON_USER_2, 0x000)
         self._pad.set(BUTTON_SCENE_1, 0x030)
         self._pad.set(BUTTON_SCENE_1 + 1, 0x000)
-        for i in range(2, 8):
+        self._pad.set(BUTTON_SCENE_1 + 2, 0x000)
+        for i in range(3, 8):
             self._pad.set(BUTTON_SCENE_1 + i, 0x030)
 
     def __create_notes(self) -> Padget:
