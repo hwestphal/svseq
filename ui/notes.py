@@ -22,7 +22,7 @@ class _Pattern(Padget):
                 c = 0x000
             else:
                 c = 0x030
-            if engine.uiState.playing and engine.uiState.beat % 8 * 4 == i:
+            if engine.uiState.playing and engine.uiState.phase * 4 == i:
                 c |= 0x100
             self._pad.set(i, c)
 

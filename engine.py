@@ -5,7 +5,7 @@ from audio.audio_engine import Engine as AudioEngine
 from mopyx import model, action, render
 from math import floor
 from datetime import timedelta
-from typing import List, Optional
+from typing import List, Tuple, Optional
 
 
 audio_engine.init_sunvox('svseq.sunvox')
@@ -15,6 +15,8 @@ class Engine:
     def __init__(self) -> None:
         self.uiState = UiState()
         self.playing = False
+        self.session = False
+        self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
         self.audioEngine = AudioEngine(
             project.tempo, 8, timedelta(milliseconds=project.latency * 5))
@@ -23,8 +25,11 @@ class Engine:
 
     def startOrStopPattern(self, track: int, pattern: int) -> None:
         if not self.playing:
+            self.tick = 0
             for i in range(8):
                 self.pattern[i] = pattern if i == track else None
+            self.__update_events()
+            self.session = False
             self.playing = True
             self.audioEngine.start()
         else:
@@ -33,9 +38,12 @@ class Engine:
 
     def startOrStopSession(self) -> None:
         if not self.playing:
+            self.tick = 0
             for i in range(8):
                 s = project.tracks[i].sequence
                 self.pattern[i] = s[0] if s else None
+            self.__update_events()
+            self.session = True
             self.playing = True
             self.audioEngine.start()
         else:
@@ -43,27 +51,57 @@ class Engine:
             self.audioEngine.stop()
 
     @action
-    def updateUiState(self) -> None:
+    def update(self) -> None:
         if not self.playing and self.uiState.playing:
             self.uiState.playing = 0
 
-        tempo, phase = self.audioEngine.getState()
+        tempo, beat = self.audioEngine.getState()
         if tempo != self.engineTempo:
             project.tempo = max(min(round(tempo), 240), 40)
 
         if self.playing:
+            tick = (floor(beat * 4) + 1) if beat >= 0 else 0
+            if tick != self.tick:
+                self.tick = tick
+                if tick % 32 == 0 and self.session:
+                    for i in range(8):
+                        s = project.tracks[i].sequence
+                        self.pattern[i] = s[(tick // 32) %
+                                            len(s)] if s else None
+                self.__update_events()
+
             for i, p in enumerate(self.pattern):
                 if p != self.uiState.pattern[i]:
                     self.uiState.pattern[i] = p
-            beat = floor(phase)
             if beat < 0:
-                beat += 8
                 if self.uiState.playing >= 0:
                     self.uiState.playing = -1
             elif self.uiState.playing <= 0:
                 self.uiState.playing = 1
-            if beat != self.uiState.beat:
-                self.uiState.beat = beat
+            phase = floor(beat) % 8
+            if phase != self.uiState.phase:
+                self.uiState.phase = phase
+
+    def __update_events(self) -> None:
+        """
+        track_num - track number within the pattern;
+        note: 0 - nothing; 1..127 - note num; 128 - note off; 129, 130... - see NOTECMD_xxx defines;
+        vel: velocity 1..129; 0 - default;
+        module: 0 (empty) or module number + 1 (1..65535);
+        ctl: 0xCCEE. CC - number of a controller (1..255). EE - effect;
+        ctl_val: value of controller or effect.
+        """
+        events: List[Tuple[int, int, int, int, int, int]] = []
+        for i in range(8):
+            track = project.tracks[i]
+            p = self.pattern[i]
+            if p is not None:
+                note = track.patterns[p].notes[self.tick % 32]
+                if note.tone:
+                    events.append(
+                        (i * 4, note.tone, 0, track.instrument + 2, 0, 0))
+                # TODO velocity and controllers
+        self.audioEngine.setEvents(events)
 
     @render
     def __tempo_changed(self) -> None:
@@ -82,7 +120,7 @@ class UiState:
         # -1 | 0 | 1
         self.playing = 0
         # 0 - 7
-        self.beat = 0
+        self.phase = 0
         # None | 0 - 7 per track
         self.pattern: List[Optional[int]] = [None] * 8
 

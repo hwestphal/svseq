@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>
 #include <pybind11/chrono.h>
+#include <pybind11/stl.h>
 
 #define SUNVOX_MAIN
 #include <sunvox.h>
@@ -62,11 +63,13 @@ PYBIND11_MODULE(audio_engine, m)
             engine.audioPlatform.mEngine.setLatency(latency);
         })
         .def("getState", [](Engine &engine) {
-            auto time = engine.link.clock().micros();
+            auto time = engine.link.clock().micros() + engine.audioPlatform.mEngine.latency();
             auto sessionState = engine.link.captureAppSessionState();
             auto quantum = engine.audioPlatform.mEngine.quantum();
             auto beat = sessionState.beatAtTime(time, quantum);
-            auto phase = beat < 0. ? beat : sessionState.phaseAtTime(time, quantum);
-            return make_tuple(sessionState.tempo(), phase);
+            return make_tuple(sessionState.tempo(), beat);
+        })
+        .def("setEvents", [](Engine &engine, std::vector<std::tuple<int, int, int, int, int, int>> &events) {
+            engine.audioPlatform.mEngine.setEvents(events);
         });
 }

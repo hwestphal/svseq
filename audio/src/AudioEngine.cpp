@@ -65,10 +65,21 @@ void AudioEngine::setQuantum(double quantum)
     mSharedEngineData.quantum = quantum;
 }
 
+std::chrono::microseconds AudioEngine::latency() const
+{
+    return mSharedEngineData.latency;
+}
+
 void AudioEngine::setLatency(std::chrono::microseconds latency)
 {
     std::lock_guard<std::mutex> lock(mEngineDataGuard);
     mSharedEngineData.latency = latency;
+}
+
+void AudioEngine::setEvents(std::vector<std::tuple<int, int, int, int, int, int>> &events)
+{
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.events = events;
 }
 
 void AudioEngine::setBufferSize(unsigned long size)
@@ -99,6 +110,8 @@ AudioEngine::EngineData AudioEngine::pullEngineData()
 
         engineData.latency = mSharedEngineData.latency;
 
+        engineData.events = mSharedEngineData.events;
+
         mEngineDataGuard.unlock();
     }
 
@@ -107,6 +120,7 @@ AudioEngine::EngineData AudioEngine::pullEngineData()
 
 void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
                                      const double quantum,
+                                     const std::vector<std::tuple<int, int, int, int, int, int>> &events,
                                      const std::chrono::microseconds beginHostTime,
                                      const uint32_t beginTicks,
                                      const std::size_t numSamples)
@@ -125,14 +139,13 @@ void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
         {
             break;
         }
-        if (timeAtBeat >= beginHostTime)
+        if (timeAtBeat >= beginHostTime && !events.empty())
         {
             sv_set_event_t(0, 1, beginTicks + round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6));
-            if ((beat % 32) == 0)
+            for (auto const &e : events)
             {
-                sv_send_event(0, 31, 45, 0, 2, 0, 0);
+                sv_send_event(0, std::get<0>(e), std::get<1>(e), std::get<2>(e), std::get<3>(e), std::get<4>(e), std::get<5>(e));
             }
-            sv_send_event(0, 0, 40, (beat % 4) == 0 ? 0 : 16, 2, 0, 0);
         }
         beat += 1;
     }
@@ -181,7 +194,7 @@ void AudioEngine::audioCallback(
     if (mIsPlaying)
     {
         // As long as the engine is playing, generate sunvox events at the appropriate beats.
-        createSunvoxEvents(sessionState, engineData.quantum, hostTime, ticks, numSamples);
+        createSunvoxEvents(sessionState, engineData.quantum, engineData.events, hostTime, ticks, numSamples);
     }
     sv_audio_callback(buffer, numSamples, 0, ticks);
 }

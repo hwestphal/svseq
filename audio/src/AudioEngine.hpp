@@ -38,7 +38,9 @@ public:
     void setTempo(double tempo);
     double quantum() const;
     void setQuantum(double quantum);
+    std::chrono::microseconds latency() const;
     void setLatency(std::chrono::microseconds latency);
+    void setEvents(std::vector<std::tuple<int, int, int, int, int, int>> &events);
 
 private:
     struct EngineData
@@ -48,6 +50,7 @@ private:
         bool requestStop;
         double quantum;
         std::chrono::microseconds latency;
+        std::vector<std::tuple<int, int, int, int, int, int>> events;
     };
 
     void setBufferSize(unsigned long size);
@@ -58,6 +61,7 @@ private:
                        float *buffer);
     void createSunvoxEvents(Link::SessionState sessionState,
                             double quantum,
+                            const std::vector<std::tuple<int, int, int, int, int, int>> &events,
                             std::chrono::microseconds beginHostTime,
                             uint32_t beginTicks,
                             std::size_t numSamples);

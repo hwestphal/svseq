@@ -32,7 +32,7 @@ try:
                 if i == BUTTON_MIXER:
                     pressedForExit = None
 
-        engine.updateUiState()
+        engine.update()
 
         if pressedForExit and pygame.time.get_ticks() - pressedForExit > 2000:
             return False
