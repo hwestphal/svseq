@@ -23,8 +23,10 @@ class Pattern(Padget):
             if i != self.__scene and (i != 1 or i != 2):
                 if i == 0:
                     self.__display = self.__create_notes()
+                elif i == 3:
+                    self.__display = Controller(self._pad, self.__pattern, 0, True)
                 else:
-                    self.__display = Controller(self._pad, self.__pattern, i-3)
+                    self.__display = Controller(self._pad, self.__pattern, i-3, False)
                 self.__scene = i
             return True
         if i == BUTTON_RIGHT:
