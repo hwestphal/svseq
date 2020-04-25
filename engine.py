@@ -61,7 +61,7 @@ class Engine:
 
         if self.playing:
             tick = (floor(beat * 4) + 1) if beat >= 0 else 0
-            if tick != self.tick:
+            if self.tick == 0 and tick == 1 or self.tick > 0 and tick > self.tick:
                 self.tick = tick
                 if tick % 32 == 0 and self.session:
                     for i in range(8):
