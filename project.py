@@ -12,7 +12,7 @@ class Project:
         self.latency = 0
         self.tracks: List[Track] = []
         for i in range(8):
-            self.tracks.append(Track(True if i % 2 else False))
+            self.tracks.append(Track(True if i % 2 else False, i // 2))
 
     @computed
     def dict(self) -> Dict[str, Any]:
@@ -44,11 +44,11 @@ class Project:
 
 @model
 class Track:
-    def __init__(self, percussion: bool):
+    def __init__(self, percussion: bool, instrument: int):
         self.muted = False
         self.volume = 1.0
         self.percussion = percussion
-        self.instrument = 0
+        self.instrument = instrument
         self.sequence: List[int] = []
         self.patterns: List[Pattern] = []
         for i in range(8):

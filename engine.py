@@ -96,6 +96,8 @@ class Engine:
             track = project.tracks[i]
             p = self.pattern[i]
             if p is not None and not track.muted:
+                instrument = track.instrument * 2 + \
+                    (3 if track.percussion else 2)
                 note = track.patterns[p].notes[self.tick % 32]
                 ctl1 = note.control[1]
                 ctl1_value = round(ctl1 * 0x8000) if ctl1 is not None else 0
@@ -104,15 +106,15 @@ class Engine:
                     vel = round(track.volume *
                                 (ctl0 if ctl0 is not None else 1) * 128) + 1
                     events.append(
-                        (i * 4, note.tone, vel, track.instrument + 2, 0x600 if ctl1 is not None else 0, ctl1_value))
+                        (i * 4, note.tone, vel, instrument, 0x600 if ctl1 is not None else 0, ctl1_value))
                 elif note.tone or ctl1 is not None:
                     events.append(
-                        (i * 4, note.tone, 0, track.instrument + 2, 0x600 if ctl1 is not None else 0, ctl1_value))
+                        (i * 4, 128 if note.tone == -1 else 0, 0, instrument, 0x600 if ctl1 is not None else 0, ctl1_value))
                 for j in range(2, 5):
                     ctl = note.control[j]
                     if ctl is not None:
                         events.append(
-                            (i * 4 + (j - 1), 0, 0, track.instrument + 2, (j + 5) << 8, round(ctl * 0x8000)))
+                            (i * 4 + (j - 1), 0, 0, instrument, (j + 5) << 8, round(ctl * 0x8000)))
         self.audioEngine.setEvents(events)
 
     @render

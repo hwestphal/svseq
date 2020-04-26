@@ -144,7 +144,7 @@ class Preset(Padget):
         self.__i = i
 
     def _buttonPressed(self, i: int) -> bool:
-        if i < 64:
+        if i < 64 and not self.__in_use(i):
             self.__track.instrument = i
             return True
         return False
@@ -157,4 +157,11 @@ class Preset(Padget):
             self._pad.set(BUTTON_SCENE_1 + i, 0x033 if i ==
                           self.__i else 0x000)
         for i in range(64):
-            self._pad.set(i, 0x003 if i == self.__track.instrument else 0x030)
+            self._pad.set(i, 0x003 if i == self.__track.instrument else (
+                0x000 if self.__in_use(i) else 0x030))
+
+    def __in_use(self, i: int) -> bool:
+        for t in project.tracks:
+            if t.percussion == self.__track.percussion and t.instrument == i:
+                return True
+        return False
