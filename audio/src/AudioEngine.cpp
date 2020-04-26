@@ -141,11 +141,14 @@ void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
         }
         if (timeAtBeat >= beginHostTime && !events.empty())
         {
+            sv_lock_slot(0);
             sv_set_event_t(0, 1, beginTicks + round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6));
             for (auto const &e : events)
             {
                 sv_send_event(0, std::get<0>(e), std::get<1>(e), std::get<2>(e), std::get<3>(e), std::get<4>(e), std::get<5>(e));
             }
+            sv_set_event_t(0, 0, 0);
+            sv_unlock_slot(0);
         }
         beat += 1;
     }

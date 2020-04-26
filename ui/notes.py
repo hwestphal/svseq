@@ -1,5 +1,5 @@
 from launchpad import Launchpad, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
-from project import Pattern
+from project import Pattern, Track
 from engine import engine
 from .padget import Padget
 
@@ -45,8 +45,10 @@ class PercussionPattern(_Pattern):
 
 
 class MelodyPattern(_Pattern):
-    def __init__(self, pad: Launchpad, pattern: Pattern):
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
         super().__init__(pad, pattern)
+        self.__track = track
+        self.__tn = tn
         self.__pressed: Optional[int] = None
         self.__transpose = False
 
@@ -75,6 +77,11 @@ class MelodyPattern(_Pattern):
             if self.__pressed is not None:
                 self._pattern.notes[self.__pressed].tone = _to_tone(
                     i-32, self._pattern.octave)
+            else:
+                tone = _to_tone(i-32, self._pattern.octave)
+                if tone > 0 and not self.__track.muted:
+                    engine.audioEngine.sendNote(
+                        self.__tn * 4, _to_tone(i-32, self._pattern.octave), round(self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
             return True
         return False
 
@@ -84,6 +91,9 @@ class MelodyPattern(_Pattern):
             return True
         if i == self.__pressed:
             self.__pressed = None
+            return True
+        if i >= 32 and i < 64:
+            engine.audioEngine.sendNoteOff(self.__tn * 4, self.__track.instrument * 2 + 2)
             return True
         return False
 

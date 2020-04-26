@@ -9,12 +9,11 @@ from .controller import Controller
 class Pattern(Padget):
     def __init__(self, pad: Launchpad, t: int, p: int):
         super().__init__(pad)
-        track = project.tracks[t]
-        self.__pattern = track.patterns[p]
-        self.__percussion = track.percussion
+        self.__track = project.tracks[t]
+        self.__pattern = self.__track.patterns[p]
+        self.__tn = t
         self.__display = self.__create_notes()
         self.__scene = 0
-        self.__tn = t
         self.__pn = p
 
     def _buttonPressed(self, i: int) -> bool:
@@ -47,6 +46,6 @@ class Pattern(Padget):
             self._pad.set(BUTTON_SCENE_1 + i, 0x030)
 
     def __create_notes(self) -> Padget:
-        if self.__percussion:
+        if self.__track.percussion:
             return PercussionPattern(self._pad, self.__pattern)
-        return MelodyPattern(self._pad, self.__pattern)
+        return MelodyPattern(self._pad, self.__pattern, self.__track, self.__tn)

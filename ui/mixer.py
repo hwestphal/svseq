@@ -1,5 +1,6 @@
 from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SCENE_1
 from project import project
+from engine import engine
 from .padget import Padget
 
 from typing import List, Tuple
@@ -28,6 +29,9 @@ class Track(Padget):
     def _buttonPressed(self, i: int) -> bool:
         if i == BUTTON_SCENE_1 + self.__i:
             self.__track.muted = not self.__track.muted
+            if self.__track.muted:
+                engine.audioEngine.sendNoteOff(
+                    self.__i * 4, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
             return True
         if i >= self.__i * 8 and i < (self.__i + 1) * 8:
             i -= self.__i * 8

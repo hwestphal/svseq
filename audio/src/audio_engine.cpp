@@ -71,5 +71,15 @@ PYBIND11_MODULE(audio_engine, m)
         })
         .def("setEvents", [](Engine &engine, std::vector<std::tuple<int, int, int, int, int, int>> &events) {
             engine.audioPlatform.mEngine.setEvents(events);
+        })
+        .def("sendNote", [](Engine &engine, int track_num, int note, int vel, int module) {
+            sv_lock_slot(0);
+            sv_send_event(0, track_num, note, vel, module, 0, 0);
+            sv_unlock_slot(0);
+        })
+        .def("sendNoteOff", [](Engine &engine, int track_num, int module) {
+            sv_lock_slot(0);
+            sv_send_event(0, track_num, 128, 0, module, 0, 0);
+            sv_unlock_slot(0);
         });
 }
