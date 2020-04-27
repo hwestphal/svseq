@@ -1,6 +1,5 @@
 from project import project
-from audio import audio_engine
-from audio.audio_engine import Engine as AudioEngine
+import audio_engine
 
 from mopyx import model, action, render
 from math import floor
@@ -18,7 +17,7 @@ class Engine:
         self.session = False
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
-        self.audioEngine = AudioEngine(
+        self.audioEngine = audio_engine.Engine(
             project.tempo, 8, timedelta(milliseconds=project.latency * 5))
         self.__tempo_changed()
         self.__latency_changed()

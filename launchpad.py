@@ -23,7 +23,7 @@ class Launchpad:
         midiIn = midiOut = None
         for i in range(pygame.midi.get_count()):
             _, name, input, output, opened = pygame.midi.get_device_info(i)
-            if name == id and not opened:
+            if name.endswith(id) and not opened:
                 if input and midiIn is None:
                     midiIn = i
                 elif output and midiOut is None:
