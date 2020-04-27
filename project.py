@@ -11,8 +11,10 @@ class Project:
         # 0 - 48
         self.latency = 0
         self.tracks: List[Track] = []
-        for i in range(8):
-            self.tracks.append(Track(True if i % 2 else False, i // 2))
+        for i in range(4):
+            self.tracks.append(Track(False, i))
+        for i in range(4):
+            self.tracks.append(Track(True, i))
 
     @computed
     def dict(self) -> Dict[str, Any]:
