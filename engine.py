@@ -1,13 +1,10 @@
 from project import project
-import audio_engine
+from audio_engine import Engine as AudioEngine
 
 from mopyx import model, action, render
 from math import floor
 from datetime import timedelta
 from typing import List, Tuple, Optional
-
-
-audio_engine.init_sunvox('svseq.sunvox')
 
 
 class Engine:
@@ -17,7 +14,7 @@ class Engine:
         self.session = False
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
-        self.audioEngine = audio_engine.Engine(
+        self.audioEngine = AudioEngine(
             project.tempo, 8, timedelta(milliseconds=project.latency * 5))
         self.__tempo_changed()
         self.__latency_changed()

@@ -2,12 +2,16 @@ from launchpad import Launchpad, BUTTON_MIXER
 from ui import App
 from project import project
 from engine import engine
+import audio_engine
 
 import pygame.time
 from mopyx import action
 
 
 PROJECT_FILE = 'project.json'
+SUNVOX_FILE = 'svseq.sunvox'
+
+audio_engine.init_sunvox(SUNVOX_FILE)
 
 clock = pygame.time.Clock()
 pad = Launchpad()
