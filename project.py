@@ -1,5 +1,5 @@
 from mopyx import model, computed, action
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple, cast
 import json
 
 
@@ -115,12 +115,14 @@ class Note:
         # 0: silence
         # 1 - 108: C1 - B9
         self.tone = 0
+        self.chord: Tuple[Optional[int], Optional[int],
+                          Optional[int]] = (None, None, None)
         # None | 0.0 - 1.0
         self.control: List[Optional[float]] = [None] * 5
 
     @computed
     def empty(self) -> bool:
-        if self.tone:
+        if self.tone or self.chord != (None, None, None):
             return False
         for c in self.control:
             if c is not None:
@@ -131,12 +133,15 @@ class Note:
     def dict(self) -> Dict[str, Any]:
         return {
             'tone': self.tone,
+            'chord': self.chord,
             'control': self.control
         }
 
     @action
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.tone = d['tone']
+        self.chord = cast(Tuple[Optional[int], Optional[int],
+                                Optional[int]], tuple(d['chord']))
         self.control = d['control']
 
 
