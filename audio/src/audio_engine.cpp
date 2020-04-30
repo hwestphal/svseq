@@ -55,6 +55,7 @@ PYBIND11_MODULE(audio_engine, m)
         })
         .def("stop", [](Engine &engine) {
             engine.audioPlatform.mEngine.stopPlaying();
+            sv_stop(0);
         })
         .def("setTempo", [](Engine &engine, double tempo) {
             engine.audioPlatform.mEngine.setTempo(tempo);
