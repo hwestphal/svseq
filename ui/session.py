@@ -146,7 +146,7 @@ class Preset(Padget):
     def _buttonPressed(self, i: int) -> bool:
         if i < 64 and not self.__in_use(i):
             engine.audioEngine.sendNoteOff(
-                self.__i * 4, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
+                self.__i, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
             self.__track.instrument = i
             return True
         return False

@@ -80,8 +80,8 @@ class MelodyPattern(_Pattern):
             else:
                 tone = _to_tone(i-32, self._pattern.octave)
                 if tone > 0 and not self.__track.muted:
-                    engine.audioEngine.sendNote(
-                        self.__tn * 4, _to_tone(i-32, self._pattern.octave), round(self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
+                    engine.audioEngine.sendNotes(
+                        self.__tn, _to_tone(i-32, self._pattern.octave), 128, 128, 128, round(self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
             return True
         return False
 
@@ -93,7 +93,7 @@ class MelodyPattern(_Pattern):
             self.__pressed = None
             return True
         if i >= 32 and i < 64:
-            engine.audioEngine.sendNoteOff(self.__tn * 4, self.__track.instrument * 2 + 2)
+            engine.audioEngine.sendNoteOff(self.__tn, self.__track.instrument * 2 + 2)
             return True
         return False
 

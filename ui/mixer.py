@@ -31,7 +31,7 @@ class Track(Padget):
             self.__track.muted = not self.__track.muted
             if self.__track.muted:
                 engine.audioEngine.sendNoteOff(
-                    self.__i * 4, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
+                    self.__i, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
             return True
         if i >= self.__i * 8 and i < (self.__i + 1) * 8:
             i -= self.__i * 8

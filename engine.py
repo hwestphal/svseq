@@ -110,7 +110,7 @@ class Engine:
                     ctl = note.control[j]
                     if ctl is not None:
                         events.append(
-                            (i * 4 + (j - 1), 0, 0, instrument, (j + 5) << 8, round(ctl * 0x8000)))
+                            (i * 4 + (j - 1), 128, 0, instrument, (j + 5) << 8, round(ctl * 0x8000)))
         self.audioEngine.setEvents(events)
 
     @render

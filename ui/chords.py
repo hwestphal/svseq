@@ -21,9 +21,11 @@ class Chords(Padget):
         if i >= 40 and i < 48:
             if self.__pressed is not None:
                 self.__pattern.notes[self.__pressed].chord = _chords[i - 40]
-            elif not self.__track.muted:
-                # TODO play chord
-                pass
+            elif not self.__track.muted and not engine.playing:
+                tone = 1 + self.__pattern.octave * 12
+                chord = _chords[i - 40]
+                engine.audioEngine.sendNotes(self.__tn, tone, tone + chord[0], tone + chord[1], (tone + chord[2]) if chord[2] is not None else 128, round(
+                    self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
             return True
         if i >= 32 and i < 40 or i >= 48 and i < 64:
             if self.__pressed is not None:
@@ -34,6 +36,10 @@ class Chords(Padget):
     def _buttonReleased(self, i: int) -> bool:
         if i == self.__pressed:
             self.__pressed = None
+            return True
+        if i >= 40 and i < 48:
+            engine.audioEngine.sendNoteOff(
+                self.__tn, self.__track.instrument * 2 + 2)
             return True
         return False
 
