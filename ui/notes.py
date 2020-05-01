@@ -15,18 +15,6 @@ class _Pattern(Padget):
 
     def _render(self) -> None:
         self._pad.set(BUTTON_SCENE_1, 0x033)
-        notes = self._pattern.notes
-        for i in range(32):
-            tone = notes[i].tone
-            if tone == -1:
-                c = 0x003
-            elif tone == 0:
-                c = 0x000
-            else:
-                c = 0x030
-            if engine.uiState.playing and engine.uiState.phase * 4 == i:
-                c |= 0x100
-            self._pad.set(i, c)
 
 
 class PercussionPattern(_Pattern):
@@ -56,6 +44,16 @@ class PercussionPattern(_Pattern):
 
     def _render(self) -> None:
         super()._render()
+        notes = self._pattern.notes
+        for i in range(32):
+            tone = notes[i].tone
+            if tone > 0:
+                c = _octave_color[(tone - 1) // 12]
+                if engine.uiState.playing and engine.uiState.phase * 4 == i:
+                    c |= 0x100
+            else:
+                c = 0x000
+            self._pad.set(i, c)
         for i in range(32, 40):
             self._pad.set(i, 0x000)
         for i in range(40, 48):
@@ -121,6 +119,18 @@ class MelodyPattern(_Pattern):
 
     def _render(self) -> None:
         super()._render()
+        notes = self._pattern.notes
+        for i in range(32):
+            tone = notes[i].tone
+            if tone == -1:
+                c = 0x003
+            elif tone == 0:
+                c = 0x000
+            else:
+                c = 0x030
+            if engine.uiState.playing and engine.uiState.phase * 4 == i:
+                c |= 0x100
+            self._pad.set(i, c)
         self._pad.set(BUTTON_USER_1, 0x033 if self.__transpose else 0x030)
         self._pad.set(
             BUTTON_UP, 0x030 if self._pattern.octave > 0 or self.__transpose else 0x000)
