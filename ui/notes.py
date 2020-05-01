@@ -7,9 +7,11 @@ from typing import Optional
 
 
 class _Pattern(Padget):
-    def __init__(self, pad: Launchpad, pattern: Pattern):
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
         super().__init__(pad)
         self._pattern = pattern
+        self._track = track
+        self._tn = tn
 
     def _render(self) -> None:
         self._pad.set(BUTTON_SCENE_1, 0x033)
@@ -34,21 +36,41 @@ class PercussionPattern(_Pattern):
             if tone:
                 self._pattern.notes[i].tone = 0
             else:
-                self._pattern.notes[i].tone = 61  # C5
+                self._pattern.notes[i].tone = 1 + 12 * self._pattern.octave
+            return True
+        if i >= 40 and i < 48:
+            o = i - 39
+            self._pattern.octave = o
+            if not self._track.muted and not engine.playing:
+                engine.audioEngine.sendNotes(
+                    self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
+            return True
+        return False
+
+    def _buttonReleased(self, i: int) -> bool:
+        if i >= 40 and i < 48 and not engine.playing:
+            engine.audioEngine.sendNoteOff(
+                self._tn, self._track.instrument * 2 + 3)
             return True
         return False
 
     def _render(self) -> None:
         super()._render()
-        for i in range(32, 64):
+        for i in range(32, 40):
+            self._pad.set(i, 0x000)
+        for i in range(40, 48):
+            o = i - 39
+            c = _octave_color[o]
+            if self._pattern.octave == o:
+                c |= 0x100
+            self._pad.set(i, c)
+        for i in range(48, 64):
             self._pad.set(i, 0x000)
 
 
 class MelodyPattern(_Pattern):
     def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
-        super().__init__(pad, pattern)
-        self.__track = track
-        self.__tn = tn
+        super().__init__(pad, pattern, track, tn)
         self.__pressed: Optional[int] = None
         self.__transpose = False
 
@@ -77,9 +99,9 @@ class MelodyPattern(_Pattern):
             tone = _to_tone(i-32, self._pattern.octave)
             if self.__pressed is not None:
                 self._pattern.notes[self.__pressed].tone = tone
-            elif tone > 0 and not self.__track.muted:
+            elif tone > 0 and not self._track.muted:
                 engine.audioEngine.sendNotes(
-                    self.__tn, tone, 128, 128, 128, round(self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
+                    self._tn, tone, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 2)
             return True
         return False
 
@@ -92,7 +114,8 @@ class MelodyPattern(_Pattern):
             return True
         if i >= 32 and i < 64:
             if self.__pressed is None and _to_tone(i-32, self._pattern.octave) > 0:
-                engine.audioEngine.sendNoteOff(self.__tn, self.__track.instrument * 2 + 2)
+                engine.audioEngine.sendNoteOff(
+                    self._tn, self._track.instrument * 2 + 2)
             return True
         return False
 

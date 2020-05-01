@@ -54,5 +54,5 @@ class Pattern(Padget):
 
     def __create_notes(self) -> Padget:
         if self.__track.percussion:
-            return PercussionPattern(self._pad, self.__pattern)
+            return PercussionPattern(self._pad, self.__pattern, self.__track, self.__tn)
         return MelodyPattern(self._pad, self.__pattern, self.__track, self.__tn)
