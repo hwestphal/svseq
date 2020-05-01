@@ -67,6 +67,7 @@ class Session(Padget):
             # clear
             for n in p.notes:
                 n.tone = 0
+                n.chord = (None, None, None)
                 for c in range(len(n.control)):
                     n.control[c] = None
             self.__copy = False
