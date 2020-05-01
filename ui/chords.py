@@ -38,8 +38,9 @@ class Chords(Padget):
             self.__pressed = None
             return True
         if i >= 40 and i < 48:
-            engine.audioEngine.sendNoteOff(
-                self.__tn, self.__track.instrument * 2 + 2)
+            if self.__pressed is None and not engine.playing:
+                engine.audioEngine.sendNoteOff(
+                    self.__tn, self.__track.instrument * 2 + 2)
             return True
         return False
 

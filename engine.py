@@ -88,29 +88,40 @@ class Engine:
         ctl_val: value of controller or effect.
         """
         events: List[Tuple[int, int, int, int, int, int]] = []
+
         for i in range(8):
             track = project.tracks[i]
             p = self.pattern[i]
+
             if p is not None and not track.muted:
                 instrument = track.instrument * 2 + \
                     (3 if track.percussion else 2)
                 note = track.patterns[p].notes[self.tick % 32]
-                ctl1 = note.control[1]
-                ctl1_value = round(ctl1 * 0x8000) if ctl1 is not None else 0
-                if note.tone > 0:
+                ctls = []
+                for ctl in note.control[1:]:
+                    ctls.append(round(ctl * 0x8000)
+                                if ctl is not None else None)
+                tone = note.tone
+
+                if tone > 0:
+                    tones = [tone]
+                    for c in note.chord:
+                        tones.append((tone + c) if c is not None else 128)
                     ctl0 = note.control[0]
                     vel = round(track.volume *
                                 (ctl0 if ctl0 is not None else 1) * 128) + 1
-                    events.append(
-                        (i * 4, note.tone, vel, instrument, 0x600 if ctl1 is not None else 0, ctl1_value))
-                elif note.tone or ctl1 is not None:
-                    events.append(
-                        (i * 4, 128 if note.tone == -1 else 0, 0, instrument, 0x600 if ctl1 is not None else 0, ctl1_value))
-                for j in range(2, 5):
-                    ctl = note.control[j]
-                    if ctl is not None:
+                    for j in range(4):
+                        ctl = ctls[j]
                         events.append(
-                            (i * 4 + (j - 1), 128, 0, instrument, (j + 5) << 8, round(ctl * 0x8000)))
+                            (i * 4 + j, tones[j], vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
+
+                else:
+                    for j in range(4):
+                        ctl = ctls[j]
+                        if tone or ctl is not None:
+                            events.append(
+                                (i * 4 + j, 128 if tone else 0, 0, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
+
         self.audioEngine.setEvents(events)
 
     @render
