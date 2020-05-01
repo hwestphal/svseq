@@ -11,9 +11,9 @@ class Project:
         # 0 - 48
         self.latency = 0
         self.tracks: List[Track] = []
-        for i in range(4):
+        for i in range(5):
             self.tracks.append(Track(False, i))
-        for i in range(4):
+        for i in range(3):
             self.tracks.append(Track(True, i))
 
     @computed
