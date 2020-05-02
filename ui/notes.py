@@ -27,7 +27,7 @@ class PercussionPattern(_Pattern):
                 self._pattern.notes[i].tone = 1 + 12 * self._pattern.octave
             return True
         if i >= 40 and i < 48:
-            o = i - 39
+            o = i - 38
             self._pattern.octave = o
             if not self._track.muted and not engine.playing:
                 engine.audioEngine.sendNotes(
@@ -57,7 +57,7 @@ class PercussionPattern(_Pattern):
         for i in range(32, 40):
             self._pad.set(i, 0x000)
         for i in range(40, 48):
-            o = i - 39
+            o = i - 38
             c = _octave_color[o]
             if self._pattern.octave == o:
                 c |= 0x100
@@ -87,7 +87,7 @@ class MelodyPattern(_Pattern):
         if i == BUTTON_UP and self._pattern.octave > 0:
             self._pattern.octave -= 1
             return True
-        if i == BUTTON_DOWN and self._pattern.octave < 7:
+        if i == BUTTON_DOWN and self._pattern.octave < 8:
             self._pattern.octave += 1
             return True
         if i < 32 and self.__pressed is None:
@@ -135,7 +135,7 @@ class MelodyPattern(_Pattern):
         self._pad.set(
             BUTTON_UP, 0x030 if self._pattern.octave > 0 or self.__transpose else 0x000)
         self._pad.set(
-            BUTTON_DOWN, 0x030 if self._pattern.octave < 7 or self.__transpose else 0x000)
+            BUTTON_DOWN, 0x030 if self._pattern.octave < 8 or self.__transpose else 0x000)
         for i in range(32):
             if i == self.__pressed:
                 self._pad.set(i, 0x033)
@@ -163,7 +163,7 @@ class MelodyPattern(_Pattern):
         for n in self._pattern.notes:
             t = n.tone
             if t > 0:
-                n.tone = max(min(t+i, 108), 0)
+                n.tone = max(min(t+i, 120), 1)
 
 
 def _to_tone(n: int, o: int) -> int:
@@ -178,6 +178,7 @@ def _to_tone(n: int, o: int) -> int:
 
 
 _octave_color = (
+    0x010,
     0x020,
     0x030,
     0x031,

@@ -85,7 +85,7 @@ class Pattern:
         for i in range(32):
             self.notes.append(Note())
         # 0 - 8
-        self.octave = 3
+        self.octave = 4
 
     @computed
     def empty(self) -> bool:
@@ -113,7 +113,7 @@ class Note:
     def __init__(self) -> None:
         # -1: note off
         # 0: silence
-        # 1 - 108: C1 - B9
+        # 1 - 120: C0 - B9
         self.tone = 0
         self.chord: Tuple[Optional[int], Optional[int],
                           Optional[int]] = (None, None, None)
