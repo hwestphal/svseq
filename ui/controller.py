@@ -7,15 +7,14 @@ from typing import Optional, Tuple
 
 
 class Controller(Padget):
-    def __init__(self, pad: Launchpad, pattern: Pattern, cn: int, velocity: bool):
+    def __init__(self, pad: Launchpad, pattern: Pattern, cn: int):
         super().__init__(pad)
         self.__pattern = pattern
         self.__cn = cn
-        self.__velocity = velocity
         self.__pressed: Optional[int] = None
 
     def _buttonPressed(self, i: int) -> bool:
-        if i < 32 and self.__pressed is None and (not self.__velocity or self.__pattern.notes[i].tone > 0):
+        if i < 32 and self.__pressed is None:
             self.__pressed = i
             return True
         if i >= 32 and i < 64:

@@ -26,12 +26,9 @@ class Pattern(Padget):
                 elif i == 1:
                     self.__display = Chords(
                         self._pad, self.__pattern, self.__track, self.__tn)
-                elif i == 3:
-                    self.__display = Controller(
-                        self._pad, self.__pattern, 0, True)
                 else:
                     self.__display = Controller(
-                        self._pad, self.__pattern, i-3, False)
+                        self._pad, self.__pattern, i - 3)
                 self.__scene = i
             return True
         if i == BUTTON_RIGHT:

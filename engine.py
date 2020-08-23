@@ -121,11 +121,14 @@ class Engine:
                             (i * 4 + j, tones[j], vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
 
                 else:
+                    ctl0 = note.control[0]
+                    vel = round(track.volume * ctl0 * 128) + \
+                        1 if ctl0 is not None else 0
                     for j in range(4):
                         ctl = ctls[j]
-                        if tone or ctl is not None:
+                        if tone or ctl is not None or vel:
                             events.append(
-                                (i * 4 + j, 128 if tone else 0, 0, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
+                                (i * 4 + j, 128 if tone else 0, vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
 
         self.audioEngine.setEvents(events)
 
