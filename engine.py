@@ -1,5 +1,5 @@
 from project import project
-from audio_engine import Engine as AudioEngine
+import audio_engine
 
 from mopyx import model, action, render
 from math import floor
@@ -14,8 +14,9 @@ class Engine:
         self.session = False
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
-        self.audioEngine = AudioEngine(
+        self.audioEngine = audio_engine.Engine(
             project.tempo, 8, timedelta(milliseconds=project.latency * 5))
+        self.defaultCtls = self.audioEngine.getCtls()
         self.__tempo_changed()
         self.__latency_changed()
 
@@ -31,6 +32,7 @@ class Engine:
         else:
             self.playing = False
             self.audioEngine.stop()
+            self.__reset_ctls()
 
     def startOrStopSession(self) -> None:
         if not self.playing:
@@ -45,6 +47,7 @@ class Engine:
         else:
             self.playing = False
             self.audioEngine.stop()
+            self.__reset_ctls()
 
     @action
     def update(self) -> None:
@@ -96,11 +99,13 @@ class Engine:
             if p is not None and not track.muted:
                 instrument = track.instrument * 2 + \
                     (3 if track.percussion else 2)
-                note = track.patterns[p].notes[self.tick % 32]
+                tick = self.tick % 32
+                note = track.patterns[p].notes[tick]
                 ctls = []
-                for ctl in note.control[1:]:
-                    ctls.append(round(ctl * 0x8000)
-                                if ctl is not None else None)
+                for j in range(4):
+                    c = note.control[j + 1]
+                    ctls.append(round(c * 0x8000)
+                                if c is not None else self.defaultCtls[instrument - 2][j] if tick == 0 else None)
                 tone = note.tone
 
                 if tone > 0:
@@ -134,6 +139,11 @@ class Engine:
         self.audioEngine.setLatency(
             timedelta(milliseconds=project.latency * 5))
 
+    def __reset_ctls(self) -> None:
+        for track in project.tracks:
+            module = track.instrument * 2 + (3 if track.percussion else 2)
+            self.audioEngine.setCtls(module, self.defaultCtls[module - 2])
+
 
 @model
 class UiState:
@@ -145,5 +155,9 @@ class UiState:
         # None | 0 - 7 per track
         self.pattern: List[Optional[int]] = [None] * 8
 
+
+SUNVOX_FILE = 'svseq.sunvox'
+
+audio_engine.init_sunvox(SUNVOX_FILE)
 
 engine = Engine()

@@ -88,5 +88,24 @@ PYBIND11_MODULE(audio_engine, m)
             sv_send_event(0, track_num * 4 + 2, 128, 0, module, 0, 0);
             sv_send_event(0, track_num * 4 + 3, 128, 0, module, 0, 0);
             sv_unlock_slot(0);
+        })
+        .def("setCtls", [](Engine &engine, int module, std::tuple<int, int, int, int> &ctls) {
+            sv_send_event(0, 0, 0, 0, module, 0x0600, std::get<0>(ctls));
+            sv_send_event(0, 0, 0, 0, module, 0x0700, std::get<1>(ctls));
+            sv_send_event(0, 0, 0, 0, module, 0x0800, std::get<2>(ctls));
+            sv_send_event(0, 0, 0, 0, module, 0x0900, std::get<3>(ctls));
+        })
+        .def("getCtls", [](Engine &engine) {
+            list vll;
+            for (int i = 1; i <= 128; i++)
+            {
+                list vl;
+                for (int j = 5; j <= 8; j++)
+                {
+                    vl.append(sv_get_module_ctl_value(0, i, j, 1));
+                }
+                vll.append(vl);
+            }
+            return vll;
         });
 }
