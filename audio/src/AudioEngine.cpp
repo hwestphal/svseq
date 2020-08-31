@@ -135,18 +135,56 @@ void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
     for (;;)
     {
         const auto timeAtBeat = sessionState.timeAtBeat(beat / 4., quantum);
+
         if (timeAtBeat >= maxTime)
         {
             break;
         }
+
         if (timeAtBeat >= beginHostTime && !events.empty())
         {
+            const auto timeAtBeat_1_32 = sessionState.timeAtBeat((beat + .5) / 4., quantum);
+            const auto timeAtBeat_1_24 = sessionState.timeAtBeat((beat + 2./3.) / 4., quantum);
+            const auto timeAtBeat_2_24 = sessionState.timeAtBeat((beat + 4./3.) / 4., quantum);
+
             sv_lock_slot(0);
-            sv_set_event_t(0, 1, beginTicks + round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6));
+
+            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6)));
             for (auto const &e : events)
             {
-                sv_send_event(0, std::get<0>(e), std::get<1>(e), std::get<2>(e), std::get<3>(e), std::get<4>(e), std::get<5>(e));
+                sv_send_event(0, std::get<0>(e), std::get<1>(e) & 0xff, std::get<2>(e), std::get<3>(e), std::get<4>(e), std::get<5>(e));
             }
+
+            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((timeAtBeat_1_32 - beginHostTime).count() * ticksPerSecond) / 1e6)));
+            for (auto const &e : events)
+            {
+                const auto tone = std::get<1>(e) & 0xff;
+                const auto trigger = std::get<1>(e) >> 8;
+                if (trigger == 1 && tone > 0 && tone < 128) {
+                    sv_send_event(0, std::get<0>(e), tone, std::get<2>(e), std::get<3>(e), 0, 0);
+                }
+            }
+
+            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((timeAtBeat_1_24 - beginHostTime).count() * ticksPerSecond) / 1e6)));
+            for (auto const &e : events)
+            {
+                const auto tone = std::get<1>(e) & 0xff;
+                const auto trigger = std::get<1>(e) >> 8;
+                if (trigger == 2 && tone > 0 && tone < 128) {
+                    sv_send_event(0, std::get<0>(e), tone, std::get<2>(e), std::get<3>(e), 0, 0);
+                }
+            }
+
+            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((timeAtBeat_2_24 - beginHostTime).count() * ticksPerSecond) / 1e6)));
+            for (auto const &e : events)
+            {
+                const auto tone = std::get<1>(e) & 0xff;
+                const auto trigger = std::get<1>(e) >> 8;
+                if (trigger == 2 && tone > 0 && tone < 128) {
+                    sv_send_event(0, std::get<0>(e), tone, std::get<2>(e), std::get<3>(e), 0, 0);
+                }
+            }
+
             sv_set_event_t(0, 0, 0);
             sv_unlock_slot(0);
         }

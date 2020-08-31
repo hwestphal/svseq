@@ -119,10 +119,14 @@ class Note:
                           Optional[int]] = (None, None, None)
         # None | 0.0 - 1.0
         self.control: List[Optional[float]] = [None] * 5
+        # 0: once
+        # 1: twice (1/32)
+        # 2: 3 times (1/24, 2/24)
+        self.trigger = 0
 
     @computed
     def empty(self) -> bool:
-        if self.tone or self.chord != (None, None, None):
+        if self.tone or self.chord != (None, None, None) or self.trigger:
             return False
         for c in self.control:
             if c is not None:
@@ -134,7 +138,8 @@ class Note:
         return {
             'tone': self.tone,
             'chord': self.chord,
-            'control': self.control
+            'control': self.control,
+            'trigger': self.trigger
         }
 
     @action
@@ -143,6 +148,7 @@ class Note:
         self.chord = cast(Tuple[Optional[int], Optional[int],
                                 Optional[int]], tuple(d['chord']))
         self.control = d['control']
+        self.trigger = d['trigger']
 
 
 project = Project()

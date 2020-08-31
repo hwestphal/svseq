@@ -118,7 +118,7 @@ class Engine:
                     for j in range(4):
                         ctl = ctls[j]
                         events.append(
-                            (i * 4 + j, tones[j], vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
+                            (i * 4 + j, tones[j] + note.trigger * 256, vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
 
                 else:
                     ctl0 = note.control[0]

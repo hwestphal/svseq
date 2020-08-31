@@ -70,6 +70,7 @@ class Session(Padget):
                 n.chord = (None, None, None)
                 for c in range(len(n.control)):
                     n.control[c] = None
+                n.trigger = 0
             self.__copy = False
             return
         st = project.tracks[self.__copy_from // 8]
@@ -79,7 +80,9 @@ class Session(Padget):
         sp = st.patterns[self.__copy_from % 8]
         for m in range(len(sp.notes)):
             p.notes[m].tone = sp.notes[m].tone
+            p.notes[m].chord = sp.notes[m].chord
             p.notes[m].control = sp.notes[m].control.copy()
+            p.notes[m].trigger = sp.notes[m].trigger
         self.__copy = False
 
     def _buttonReleased(self, i: int) -> bool:
