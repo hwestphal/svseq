@@ -6,7 +6,7 @@ from .padget import Padget
 from typing import Optional
 
 
-class Chords(Padget):
+class ChordsAndTrigger(Padget):
     def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
         super().__init__(pad)
         self.__pattern = pattern
@@ -18,7 +18,7 @@ class Chords(Padget):
         if i < 32 and self.__pressed is None and self.__pattern.notes[i].tone > 0:
             self.__pressed = i
             return True
-        if i >= 40 and i < 48:
+        if i >= 40 and i < 48 and not self.__track.percussion:
             if self.__pressed is not None:
                 self.__pattern.notes[self.__pressed].chord = _chords[i - 40]
             elif not self.__track.muted and not engine.playing:
@@ -27,9 +27,15 @@ class Chords(Padget):
                 engine.audioEngine.sendNotes(self.__tn, tone, tone + chord[0], tone + chord[1], (tone + chord[2]) if chord[2] is not None else 128, round(
                     self.__track.volume * 128) + 1, self.__track.instrument * 2 + 2)
             return True
-        if i >= 32 and i < 40 or i >= 48 and i < 64:
+        if i >= 48 and i < 50:
             if self.__pressed is not None:
-                self.__pattern.notes[self.__pressed].chord = (None, None, None)
+                self.__pattern.notes[self.__pressed].trigger = i - 47
+            return True
+        if i >= 32 and i < 48 or i >= 50 and i < 64:
+            if self.__pressed is not None:
+                n = self.__pattern.notes[self.__pressed]
+                n.chord = (None, None, None)
+                n.trigger = 0
             return True
         return False
 
@@ -37,7 +43,7 @@ class Chords(Padget):
         if i == self.__pressed:
             self.__pressed = None
             return True
-        if i >= 40 and i < 48:
+        if i >= 40 and i < 48 and not self.__track.percussion:
             if self.__pressed is None and not engine.playing:
                 engine.audioEngine.sendNoteOff(
                     self.__tn, self.__track.instrument * 2 + 2)
@@ -49,7 +55,8 @@ class Chords(Padget):
         notes = self.__pattern.notes
         for i in range(32):
             if notes[i].tone > 0:
-                c = 0x001 if notes[i].chord == (None, None, None) else 0x032
+                c = 0x001 if notes[i].chord == (
+                    None, None, None) and notes[i].trigger == 0 else 0x032
             else:
                 c = 0x000
             if engine.uiState.playing and engine.uiState.phase * 4 == i:
@@ -58,9 +65,15 @@ class Chords(Padget):
         for i in range(32, 40):
             self._pad.set(i, 0x000)
         for i in range(40, 48):
+            if self.__track.percussion:
+                self._pad.set(i, 0x000)
+            else:
+                self._pad.set(
+                    i, 0x130 if self.__pressed is not None and notes[self.__pressed].chord == _chords[i - 40] else 0x030)
+        for i in range(48, 50):
             self._pad.set(
-                i, 0x130 if self.__pressed is not None and notes[self.__pressed].chord == _chords[i - 40] else 0x030)
-        for i in range(48, 64):
+                i, 0x000 if self.__pressed is None else 0x133 if notes[self.__pressed].trigger == i - 47 else 0x033)
+        for i in range(50, 64):
             self._pad.set(i, 0x000)
 
 

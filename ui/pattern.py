@@ -4,7 +4,7 @@ from engine import engine
 from .padget import Padget
 from .notes import PercussionPattern, MelodyPattern
 from .controller import Controller
-from .chords import Chords
+from .chords import ChordsAndTrigger
 
 
 class Pattern(Padget):
@@ -20,11 +20,11 @@ class Pattern(Padget):
     def _buttonPressed(self, i: int) -> bool:
         if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
             i -= BUTTON_SCENE_1
-            if i != self.__scene and i != 2 and (i != 1 or not self.__track.percussion):
+            if i != self.__scene and i != 2:
                 if i == 0:
                     self.__display = self.__create_notes()
                 elif i == 1:
-                    self.__display = Chords(
+                    self.__display = ChordsAndTrigger(
                         self._pad, self.__pattern, self.__track, self.__tn)
                 else:
                     self.__display = Controller(
@@ -43,8 +43,7 @@ class Pattern(Padget):
         self._pad.set(BUTTON_USER_1, 0x000)
         self._pad.set(BUTTON_USER_2, 0x000)
         self._pad.set(BUTTON_SCENE_1, 0x030)
-        self._pad.set(BUTTON_SCENE_1 + 1,
-                      0x000 if self.__track.percussion else 0x030)
+        self._pad.set(BUTTON_SCENE_1 + 1, 0x030)
         self._pad.set(BUTTON_SCENE_1 + 2, 0x000)
         for i in range(3, 8):
             self._pad.set(BUTTON_SCENE_1 + i, 0x030)
