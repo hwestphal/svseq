@@ -1,4 +1,4 @@
-from project import project
+from project import project, Note
 import audio_engine
 
 from mopyx import model, action, render
@@ -95,12 +95,18 @@ class Engine:
         for i in range(8):
             track = project.tracks[i]
             p = self.pattern[i]
-
+            tick = self.tick % 32
+            note: Optional[Note]
             if p is not None and not track.muted:
+                note = track.patterns[p].notes[tick]
+            elif p is None and not track.muted and tick == 0:
+                note = Note()
+            else:
+                note = None
+
+            if note:
                 instrument = track.instrument * 2 + \
                     (3 if track.percussion else 2)
-                tick = self.tick % 32
-                note = track.patterns[p].notes[tick]
                 ctls = []
                 for j in range(4):
                     c = note.control[j + 1]
@@ -128,7 +134,7 @@ class Engine:
                         ctl = ctls[j]
                         if tone or ctl is not None or vel:
                             events.append(
-                                (i * 4 + j, 128 if tone else 0, vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
+                                (i * 4 + j, 128 if tone or tick == 0 else 0, vel, instrument, ((j + 6) << 8) if ctl is not None else 0, ctl if ctl is not None else 0))
 
         self.audioEngine.setEvents(events)
 
