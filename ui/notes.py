@@ -18,25 +18,37 @@ class _Pattern(Padget):
 
 
 class PercussionPattern(_Pattern):
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
+        super().__init__(pad, pattern, track, tn)
+        self.__pressed: Optional[int] = None
+
     def _buttonPressed(self, i: int) -> bool:
-        if i < 32:
-            tone = self._pattern.notes[i].tone
-            if tone:
-                self._pattern.notes[i].tone = 0
-            else:
-                self._pattern.notes[i].tone = 1 + 12 * self._pattern.octave
+        if i < 32 and self.__pressed is None:
+            self.__pressed = i
             return True
-        if i >= 40 and i < 48:
-            o = i - 38
-            self._pattern.octave = o
-            if not self._track.muted and not engine.playing:
+        if i >= 40 and i < 47:
+            o = i - 37
+            if self.__pressed is not None:
+                self._pattern.notes[self.__pressed].tone = 1 + 12 * o
+            elif not self._track.muted and not engine.playing:
                 engine.audioEngine.sendNotes(
                     self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
+            return True
+        if i == 47:
+            if self.__pressed is not None:
+                self._pattern.notes[self.__pressed].tone = -1
+            return True
+        if i >= 32 and i < 64:
+            if self.__pressed is not None:
+                self._pattern.notes[self.__pressed].tone = 0
             return True
         return False
 
     def _buttonReleased(self, i: int) -> bool:
-        if i >= 40 and i < 48 and not engine.playing:
+        if i == self.__pressed:
+            self.__pressed = None
+            return True
+        if i >= 40 and i < 47 and not engine.playing:
             engine.audioEngine.sendNoteOff(
                 self._tn, self._track.instrument * 2 + 3)
             return True
@@ -46,24 +58,30 @@ class PercussionPattern(_Pattern):
         super()._render()
         notes = self._pattern.notes
         for i in range(32):
-            tone = notes[i].tone
-            if tone > 0:
-                c = _octave_color[(tone - 1) // 12]
+            if i == self.__pressed:
+                c = 0x033
+            else:
+                tone = notes[i].tone
+                if tone == -1:
+                    c = 0x003
+                elif tone == 0:
+                    c = 0x000
+                else:
+                    c = 0x030
                 if engine.uiState.playing and engine.uiState.phase * 4 == i:
                     c |= 0x100
-            else:
-                c = 0x000
             self._pad.set(i, c)
         for i in range(32, 40):
             self._pad.set(i, 0x000)
-        for i in range(40, 48):
-            o = i - 38
-            c = _octave_color[o]
-            if self._pattern.octave == o:
-                c |= 0x100
-            self._pad.set(i, c)
+        for i in range(40, 47):
+            self._pad.set(i, 0x133 if self.__is_pressed(
+                1 + (i - 37) * 12) else 0x033)
+        self._pad.set(47, 0x103 if self.__is_pressed(-1) else 0x003)
         for i in range(48, 64):
             self._pad.set(i, 0x000)
+
+    def __is_pressed(self, t: int) -> bool:
+        return self.__pressed is not None and self._pattern.notes[self.__pressed].tone == t
 
 
 class MelodyPattern(_Pattern):
