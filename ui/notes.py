@@ -3,7 +3,7 @@ from project import Pattern, Track
 from engine import engine
 from .padget import Padget
 
-from typing import Optional
+from typing import Optional, List, cast
 
 
 class _Pattern(Padget):
@@ -29,18 +29,35 @@ class PercussionPattern(_Pattern):
         if i >= 40 and i < 47:
             o = i - 37
             if self.__pressed is not None:
-                self._pattern.notes[self.__pressed].tone = 1 + 12 * o
+                pt = 1 + 12 * o
+                n = self._pattern.notes[self.__pressed]
+                ts = []
+                if n.tone > 0:
+                    ts.append(n.tone)
+                    for j in range(3):
+                        if n.chord[j] is not None:
+                            ts.append(n.tone + cast(int, n.chord[j]))
+                if pt in ts:
+                    ts.remove(pt)
+                elif len(ts) < 4:
+                    ts.append(pt)
+                if ts:
+                    n.tone = ts[0]
+                else:
+                    n.tone = 0
+                cs: List[Optional[int]] = [None, None, None]
+                for i in range(1, len(ts)):
+                    cs[i - 1] = ts[i] - ts[0]
+                n.chord = (cs[0], cs[1], cs[2])
             elif not self._track.muted and not engine.playing:
                 engine.audioEngine.sendNotes(
                     self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
             return True
         if i == 47:
             if self.__pressed is not None:
-                self._pattern.notes[self.__pressed].tone = -1
-            return True
-        if i >= 32 and i < 64:
-            if self.__pressed is not None:
-                self._pattern.notes[self.__pressed].tone = 0
+                n = self._pattern.notes[self.__pressed]
+                n.tone = 0 if n.tone == -1 else -1
+                n.chord = (None, None, None)
             return True
         return False
 
@@ -81,7 +98,11 @@ class PercussionPattern(_Pattern):
             self._pad.set(i, 0x000)
 
     def __is_pressed(self, t: int) -> bool:
-        return self.__pressed is not None and self._pattern.notes[self.__pressed].tone == t
+        if self.__pressed is not None:
+            pt = self._pattern.notes[self.__pressed].tone
+            c = self._pattern.notes[self.__pressed].chord
+            return t in (pt, pt + (c[0] or 0), pt + (c[1] or 0), pt + (c[2] or 0))
+        return False
 
 
 class MelodyPattern(_Pattern):
