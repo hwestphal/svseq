@@ -2,9 +2,11 @@ from project import project, Note
 import audio_engine
 
 from mopyx import model, action, render
+import os
 from math import floor
 from datetime import timedelta
-from typing import List, Tuple, Optional
+from itertools import zip_longest
+from typing import List, Tuple, Optional, Generator
 
 
 class Engine:
@@ -165,8 +167,16 @@ class UiState:
         self.pattern: List[Optional[int]] = [None] * 8
 
 
-SUNVOX_FILE = 'svseq.sunvox'
+def modules(subfolder: str) -> Generator[str, None, None]:
+    for entry in sorted(os.scandir(os.path.join('./instruments', subfolder)), key=lambda e: e.name):
+        if entry.name.endswith('.sunsynth'):
+            yield os.path.abspath(entry.path)
 
-audio_engine.init_sunvox(SUNVOX_FILE)
+instruments = []
+for ms in zip_longest(modules('melody'), modules('percussion')):
+    for m in ms:
+        instruments.append(m or '')
+
+audio_engine.init_sunvox(instruments)
 
 engine = Engine()

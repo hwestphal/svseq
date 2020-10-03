@@ -15,13 +15,9 @@
     pipenv run python setup.py build_ext --inplace
     cd ..
 
-## Prepare sunvox file
+## Prepare instruments
 
-Put your melody and percussion instruments as `.sunsynth` files at `./instruments` and run:
-
-    pipenv run python sunvox.py
-
-This will create a `.sunvox` file containing all instruments in correct order. The file is read by `svseq` during startup.
+Put your melody and percussion instruments as `.sunsynth` files at `./instruments`.
 
 All instruments should be bundled as meta-modules exposing appropriate controls (no. 6 to 9). Percussion instruments will be played at note C3, C4 up to C9.
 

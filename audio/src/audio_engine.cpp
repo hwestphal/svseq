@@ -27,7 +27,7 @@ PYBIND11_MODULE(audio_engine, m)
 {
     using namespace pybind11;
 
-    m.def("init_sunvox", [](const char *sunvox_project_name) {
+    m.def("init_sunvox", [](list instruments) {
         if (sv_load_dll())
         {
             exit(1);
@@ -38,12 +38,27 @@ PYBIND11_MODULE(audio_engine, m)
             exit(2);
         }
         sv_open_slot(0);
-        if (sv_load(0, sunvox_project_name))
+        for (int i = 0; i < instruments.size(); i++)
         {
-            sv_close_slot(0);
-            sv_deinit();
-            sv_unload_dll();
-            exit(3);
+            auto const path = PyUnicode_AsUTF8(instruments[i].ptr());
+            if (path[0])
+            {
+                auto const m = sv_load_module(0, path, 0, 0, 0);
+                if (m < 1)
+                {
+                    sv_close_slot(0);
+                    sv_deinit();
+                    sv_unload_dll();
+                    exit(3);
+                }
+                sv_lock_slot(0);
+                sv_connect_module(0, m, 0);
+                sv_unlock_slot(0);
+            }
+            else
+            {
+                sv_load_module_from_memory(0, 0, 0, 0, 0, 0);
+            }
         }
         sv_volume(0, 256);
     });
