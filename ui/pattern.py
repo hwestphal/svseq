@@ -16,6 +16,7 @@ class Pattern(Padget):
         self.__display = self.__create_notes()
         self.__scene = 0
         self.__pn = p
+        self.__record = False
 
     def _buttonPressed(self, i: int) -> bool:
         if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
@@ -32,7 +33,16 @@ class Pattern(Padget):
                 self.__scene = i
             return True
         if i == BUTTON_RIGHT:
-            engine.startOrStopPattern(self.__tn, self.__pn)
+            engine.startOrStopPattern(self.__tn, self.__pn, self.__record)
+            return True
+        if i == BUTTON_USER_2 and not engine.playing:
+            self.__record = True
+            return True
+        return False
+
+    def _buttonReleased(self, i: int) -> bool:
+        if i == BUTTON_USER_2 and self.__record:
+            self.__record = False
             return True
         return False
 
@@ -41,7 +51,8 @@ class Pattern(Padget):
         self._pad.set(BUTTON_UP, 0x000)
         self._pad.set(BUTTON_DOWN, 0x000)
         self._pad.set(BUTTON_USER_1, 0x000)
-        self._pad.set(BUTTON_USER_2, 0x000)
+        self._pad.set(BUTTON_USER_2, 0x103 if engine.recording == (self.__tn, self.__pn)
+                      else 0x000 if engine.playing else 0x033 if self.__record else 0x030)
         self._pad.set(BUTTON_SCENE_1, 0x030)
         self._pad.set(BUTTON_SCENE_1 + 1, 0x030)
         self._pad.set(BUTTON_SCENE_1 + 2, 0x000)

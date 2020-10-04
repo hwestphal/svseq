@@ -13,6 +13,7 @@ class Engine:
     def __init__(self) -> None:
         self.uiState = UiState()
         self.playing = False
+        self.recording: Optional[Tuple[int, int]] = None
         self.session = False
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
@@ -22,7 +23,7 @@ class Engine:
         self.__tempo_changed()
         self.__latency_changed()
 
-    def startOrStopPattern(self, track: int, pattern: int) -> None:
+    def startOrStopPattern(self, track: int, pattern: int, record: bool) -> None:
         if not self.playing:
             self.tick = 0
             for i in range(8):
@@ -30,8 +31,11 @@ class Engine:
             self.__update_events()
             self.session = False
             self.playing = True
+            if record:
+                self.recording = (track, pattern)
             self.audioEngine.start()
         else:
+            self.recording = None
             self.playing = False
             self.audioEngine.stop()
             self.__reset_ctls()
@@ -171,6 +175,7 @@ def modules(subfolder: str) -> Generator[str, None, None]:
     for entry in sorted(os.scandir(os.path.join('./instruments', subfolder)), key=lambda e: e.name):
         if entry.name.endswith('.sunsynth'):
             yield os.path.abspath(entry.path)
+
 
 instruments = []
 for ms in zip_longest(modules('melody'), modules('percussion')):
