@@ -49,7 +49,7 @@ class PercussionPattern(_Pattern):
                 for i in range(1, len(ts)):
                     cs[i - 1] = ts[i] - ts[0]
                 n.chord = (cs[0], cs[1], cs[2])
-            elif not self._track.muted and not engine.playing:
+            elif not self._track.muted:
                 engine.audioEngine.sendNotes(
                     self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
             return True
