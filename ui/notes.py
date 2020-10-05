@@ -30,29 +30,13 @@ class PercussionPattern(_Pattern):
         if i >= 40 and i < 47:
             o = i - 37
             if self.__pressed is not None:
-                pt = 1 + 12 * o
-                n = self._pattern.notes[self.__pressed]
-                ts = []
-                if n.tone > 0:
-                    ts.append(n.tone)
-                    for j in range(3):
-                        if n.chord[j] is not None:
-                            ts.append(n.tone + cast(int, n.chord[j]))
-                if pt in ts:
-                    ts.remove(pt)
-                elif len(ts) < 4:
-                    ts.append(pt)
-                if ts:
-                    n.tone = ts[0]
-                else:
-                    n.tone = 0
-                cs: List[Optional[int]] = [None, None, None]
-                for i in range(1, len(ts)):
-                    cs[i - 1] = ts[i] - ts[0]
-                n.chord = (cs[0], cs[1], cs[2])
-            elif not self._track.muted:
-                engine.audioEngine.sendNotes(
-                    self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
+                self.__record(o, self.__pressed, True)
+            else:
+                if engine.recording == (self._tn, self._pn):
+                    self.__record(o, engine.tick % 32, False)
+                if not self._track.muted:
+                    engine.audioEngine.sendNotes(
+                        self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
             return True
         if i == 47:
             if self.__pressed is not None:
@@ -61,6 +45,29 @@ class PercussionPattern(_Pattern):
                 n.chord = (None, None, None)
             return True
         return False
+
+    def __record(self, o: int, t: int, remove: bool) -> None:
+        pt = 1 + 12 * o
+        n = self._pattern.notes[t]
+        ts = []
+        if n.tone > 0:
+            ts.append(n.tone)
+            for j in range(3):
+                if n.chord[j] is not None:
+                    ts.append(n.tone + cast(int, n.chord[j]))
+        if pt in ts:
+            if remove:
+                ts.remove(pt)
+        elif len(ts) < 4:
+            ts.append(pt)
+        if ts:
+            n.tone = ts[0]
+        else:
+            n.tone = 0
+        cs: List[Optional[int]] = [None, None, None]
+        for i in range(1, len(ts)):
+            cs[i - 1] = ts[i] - ts[0]
+        n.chord = (cs[0], cs[1], cs[2])
 
     def _buttonReleased(self, i: int) -> bool:
         if i == self.__pressed:
