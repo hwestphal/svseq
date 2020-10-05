@@ -13,9 +13,9 @@ class Pattern(Padget):
         self.__track = project.tracks[t]
         self.__pattern = self.__track.patterns[p]
         self.__tn = t
+        self.__pn = p
         self.__display = self.__create_notes()
         self.__scene = 0
-        self.__pn = p
         self.__record = False
 
     def _buttonPressed(self, i: int) -> bool:
@@ -61,5 +61,5 @@ class Pattern(Padget):
 
     def __create_notes(self) -> Padget:
         if self.__track.percussion:
-            return PercussionPattern(self._pad, self.__pattern, self.__track, self.__tn)
-        return MelodyPattern(self._pad, self.__pattern, self.__track, self.__tn)
+            return PercussionPattern(self._pad, self.__pattern, self.__track, self.__tn, self.__pn)
+        return MelodyPattern(self._pad, self.__pattern, self.__track, self.__tn, self.__pn)

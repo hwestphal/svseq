@@ -7,19 +7,20 @@ from typing import Optional, List, cast
 
 
 class _Pattern(Padget):
-    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int, pn: int):
         super().__init__(pad)
         self._pattern = pattern
         self._track = track
         self._tn = tn
+        self._pn = pn
 
     def _render(self) -> None:
         self._pad.set(BUTTON_SCENE_1, 0x033)
 
 
 class PercussionPattern(_Pattern):
-    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
-        super().__init__(pad, pattern, track, tn)
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int, pn: int):
+        super().__init__(pad, pattern, track, tn, pn)
         self.__pressed: Optional[int] = None
 
     def _buttonPressed(self, i: int) -> bool:
@@ -106,8 +107,8 @@ class PercussionPattern(_Pattern):
 
 
 class MelodyPattern(_Pattern):
-    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int):
-        super().__init__(pad, pattern, track, tn)
+    def __init__(self, pad: Launchpad, pattern: Pattern, track: Track, tn: int, pn: int):
+        super().__init__(pad, pattern, track, tn, pn)
         self.__pressed: Optional[int] = None
         self.__transpose = False
 
@@ -136,9 +137,14 @@ class MelodyPattern(_Pattern):
             tone = _to_tone(i-32, self._pattern.octave)
             if self.__pressed is not None:
                 self._pattern.notes[self.__pressed].tone = tone
-            elif tone > 0 and not self._track.muted:
-                engine.audioEngine.sendNotes(
-                    self._tn, tone, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 2)
+            elif tone > 0:
+                if engine.recording == (self._tn, self._pn):
+                    n = self._pattern.notes[engine.tick % 32]
+                    n.tone = tone
+                    n.chord = (None, None, None)
+                if not self._track.muted:
+                    engine.audioEngine.sendNotes(
+                        self._tn, tone, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 2)
             return True
         return False
 
