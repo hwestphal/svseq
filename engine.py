@@ -33,7 +33,7 @@ class Engine:
             self.playing = True
             if record:
                 self.recording = (track, pattern)
-            self.audioEngine.start()
+            self.audioEngine.start(record)
         else:
             self.recording = None
             self.playing = False
@@ -49,7 +49,7 @@ class Engine:
             self.__update_events()
             self.session = True
             self.playing = True
-            self.audioEngine.start()
+            self.audioEngine.start(False)
         else:
             self.playing = False
             self.audioEngine.stop()

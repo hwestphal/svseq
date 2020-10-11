@@ -65,8 +65,8 @@ PYBIND11_MODULE(audio_engine, m)
 
     class_<Engine>(m, "Engine")
         .def(init<double, double, std::chrono::microseconds>())
-        .def("start", [](Engine &engine) {
-            engine.audioPlatform.mEngine.startPlaying();
+        .def("start", [](Engine &engine, bool metronome) {
+            engine.audioPlatform.mEngine.startPlaying(metronome);
         })
         .def("stop", [](Engine &engine) {
             engine.audioPlatform.mEngine.stopPlaying();

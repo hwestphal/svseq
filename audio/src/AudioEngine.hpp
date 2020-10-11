@@ -33,7 +33,7 @@ class AudioEngine
 {
 public:
     AudioEngine(Link &link);
-    void startPlaying();
+    void startPlaying(bool metronome);
     void stopPlaying();
     void setTempo(double tempo);
     double quantum() const;
@@ -51,6 +51,7 @@ private:
         double quantum;
         std::chrono::microseconds latency;
         std::vector<std::tuple<int, int, int, int, int, int>> events;
+        bool metronome;
     };
 
     void setBufferSize(unsigned long size);
@@ -65,6 +66,11 @@ private:
                             std::chrono::microseconds beginHostTime,
                             uint32_t beginTicks,
                             std::size_t numSamples);
+    void renderMetronomeIntoBuffer(Link::SessionState sessionState,
+                                   double quantum,
+                                   std::chrono::microseconds beginHostTime,
+                                   float *buffer,
+                                   std::size_t numSamples);
 
     Link &mLink;
     double mSampleRate;
@@ -73,6 +79,7 @@ private:
     EngineData mSharedEngineData;
     bool mIsPlaying;
     std::mutex mEngineDataGuard;
+    std::chrono::microseconds mTimeAtLastClick;
 
     friend class AudioPlatform;
 };
