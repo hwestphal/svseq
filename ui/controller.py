@@ -14,8 +14,24 @@ class Controller(Padget):
         self.__pressed: Optional[int] = None
 
     def _buttonPressed(self, i: int) -> bool:
-        if i < 32 and self.__pressed is None:
-            self.__pressed = i
+        if i < 32:
+            if self.__pressed is None:
+                self.__pressed = i
+            else:
+                s = self.__pressed
+                e = i
+                if s > e:
+                    s, e = e, s
+                notes = self.__pattern.notes
+                sv = notes[s].control[self.__cn]
+                ev = notes[e].control[self.__cn]
+                if sv is None and ev is None:
+                    for j in range(s + 1, e):
+                        notes[j].control[self.__cn] = None
+                else:
+                    d = ((ev or 0) - (sv or 0)) / (e - s)
+                    for j in range(s + 1, e):
+                        notes[j].control[self.__cn] = (sv or 0) + (j - s) * d
             return True
         if i >= 32 and i < 64:
             if self.__pressed is not None:

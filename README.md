@@ -9,7 +9,8 @@
 
 ## Build
 
-    git clone --recurse-submodules git@gitlab.com:hwestphal/svseq.git
+    git clone --recurse-submodules https://gitlab.com/hwestphal/svseq.git
+    cd svseq
     pipenv install --dev
     cd audio
     pipenv run python setup.py build_ext --inplace
