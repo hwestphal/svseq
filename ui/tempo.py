@@ -23,6 +23,12 @@ class Tempo(Padget):
         if i == BUTTON_SCENE_1+1 and project.tempo >= 50:
             project.tempo -= 10
             return True
+        if i == BUTTON_SCENE_1+4 and project.quantum < 8:
+            project.quantum += 1
+            return True
+        if i == BUTTON_SCENE_1+5 and project.quantum > 1:
+            project.quantum -= 1
+            return True
         if i == BUTTON_SCENE_1+6 and project.latency < 24:
             project.latency += 1
             return True
@@ -36,12 +42,16 @@ class Tempo(Padget):
         self._pad.set(BUTTON_SCENE_1, 0x030 if project.tempo <= 230 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 1,
                       0x030 if project.tempo >= 50 else 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 2, 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 3, 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 4,
+                      0x030 if project.quantum < 8 else 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 5,
+                      0x030 if project.quantum > 1 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 6,
                       0x030 if project.latency < 24 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 7,
                       0x030 if project.latency > 0 else 0x000)
-        for i in range(2, 6):
-            self._pad.set(BUTTON_SCENE_1 + i, 0x000)
         self._pad.set(BUTTON_UP, 0x030 if project.tempo < 240 else 0x000)
         self._pad.set(BUTTON_DOWN, 0x030 if project.tempo > 40 else 0x000)
 
@@ -60,14 +70,19 @@ class Tempo(Padget):
             for j in range(3):
                 self._pad.set(i * 8 + j + 5, 0x003 if d[i][j] else 0x000)
 
-        for i in range(40, 56):
+        for i in range(40, 48):
             self._pad.set(i, 0x000)
+
+        for i in range(project.quantum):
+            self._pad.set(i + 48, 0x030)
+        for i in range(project.quantum, 8):
+            self._pad.set(i + 48, 0x000)
 
         c, v = _to_column_and_value(project.latency)
         for i in range(c):
             self._pad.set(i + 56, 0x033)
         self._pad.set(c + 56, 0x011 * v)
-        for i in range(c+1, 8):
+        for i in range(c + 1, 8):
             self._pad.set(i + 56, 0x000)
 
 

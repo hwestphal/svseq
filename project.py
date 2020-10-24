@@ -10,6 +10,8 @@ class Project:
         self.tempo = 125
         # 0 - 24
         self.latency = 0
+        # 1 - 8
+        self.quantum = 8
         self.tracks: List[Track] = []
         for i in range(5):
             self.tracks.append(Track(False, i))
@@ -21,6 +23,7 @@ class Project:
         return {
             'tempo': self.tempo,
             'latency': self.latency,
+            'quantum': self.quantum,
             'tracks': [t.dict for t in self.tracks]
         }
 
@@ -28,6 +31,7 @@ class Project:
     def from_dict(self, d: Dict[str, Any]) -> None:
         self.tempo = d['tempo']
         self.latency = d['latency']
+        self.quantum = d['quantum']
         for i in range(len(self.tracks)):
             self.tracks[i].from_dict(d['tracks'][i])
 
