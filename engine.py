@@ -18,10 +18,11 @@ class Engine:
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
         self.audioEngine = audio_engine.Engine(
-            project.tempo, 8, timedelta(milliseconds=project.latency * 5))
+            project.tempo, project.quantum, timedelta(milliseconds=project.latency * 7))
         self.defaultCtls = self.audioEngine.getCtls()
         self.__tempo_changed()
         self.__latency_changed()
+        self.__quantum_changed()
 
     def startOrStopPattern(self, track: int, pattern: int, record: bool) -> None:
         if not self.playing:
@@ -68,10 +69,10 @@ class Engine:
             tick = (floor(beat * 4) + 1) if beat >= 0 else 0
             if self.tick == 0 and tick == 1 or self.tick > 0 and tick > self.tick:
                 self.tick = tick
-                if tick % 32 == 0 and self.session:
+                if tick % (project.quantum * 4) == 0 and self.session:
                     for i in range(8):
                         s = project.tracks[i].sequence
-                        self.pattern[i] = s[(tick // 32) %
+                        self.pattern[i] = s[(tick // (project.quantum * 4)) %
                                             len(s)] if s else None
                 self.__update_events()
 
@@ -83,7 +84,7 @@ class Engine:
                     self.uiState.playing = -1
             elif self.uiState.playing <= 0:
                 self.uiState.playing = 1
-            phase = floor(beat) % 8
+            phase = floor(beat) % project.quantum
             if phase != self.uiState.phase:
                 self.uiState.phase = phase
 
@@ -101,7 +102,7 @@ class Engine:
         for i in range(8):
             track = project.tracks[i]
             p = self.pattern[i]
-            tick = self.tick % 32
+            tick = self.tick % (project.quantum * 4)
             note: Optional[Note]
             if p is not None and not track.muted:
                 note = track.patterns[p].notes[tick]
@@ -153,6 +154,10 @@ class Engine:
     def __latency_changed(self) -> None:
         self.audioEngine.setLatency(
             timedelta(milliseconds=project.latency * 7))
+
+    @render
+    def __quantum_changed(self) -> None:
+        self.audioEngine.setQuantum(project.quantum)
 
     def __reset_ctls(self) -> None:
         for track in project.tracks:

@@ -78,6 +78,9 @@ PYBIND11_MODULE(audio_engine, m)
         .def("setLatency", [](Engine &engine, std::chrono::microseconds latency) {
             engine.audioPlatform.mEngine.setLatency(latency);
         })
+        .def("setQuantum", [](Engine &engine, double quantum) {
+            engine.audioPlatform.mEngine.setQuantum(quantum);
+        })
         .def("getState", [](Engine &engine) {
             auto time = engine.link.clock().micros() + engine.audioPlatform.mEngine.latency();
             auto sessionState = engine.link.captureAppSessionState();
