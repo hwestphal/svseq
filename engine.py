@@ -152,7 +152,7 @@ class Engine:
     @render
     def __latency_changed(self) -> None:
         self.audioEngine.setLatency(
-            timedelta(milliseconds=project.latency * 5))
+            timedelta(milliseconds=project.latency * 7))
 
     def __reset_ctls(self) -> None:
         for track in project.tracks:
