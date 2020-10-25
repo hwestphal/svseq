@@ -1,5 +1,6 @@
 from launchpad import Launchpad, BUTTON_LEFT, BUTTON_SCENE_1, BUTTON_UP, BUTTON_DOWN
 from project import project
+from engine import engine
 from .padget import Padget
 
 from typing import List, Tuple
@@ -23,17 +24,14 @@ class Tempo(Padget):
         if i == BUTTON_SCENE_1+1 and project.tempo >= 50:
             project.tempo -= 10
             return True
-        if i == BUTTON_SCENE_1+4 and project.quantum < 8:
-            project.quantum += 1
-            return True
-        if i == BUTTON_SCENE_1+5 and project.quantum > 1:
-            project.quantum -= 1
-            return True
         if i == BUTTON_SCENE_1+6 and project.latency < 24:
             project.latency += 1
             return True
         if i == BUTTON_SCENE_1+7 and project.latency > 0:
             project.latency -= 1
+            return True
+        if i >= 48 and i < 56:
+            project.quantum = i - 47
             return True
         return False
 
@@ -42,12 +40,8 @@ class Tempo(Padget):
         self._pad.set(BUTTON_SCENE_1, 0x030 if project.tempo <= 230 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 1,
                       0x030 if project.tempo >= 50 else 0x000)
-        self._pad.set(BUTTON_SCENE_1 + 2, 0x000)
-        self._pad.set(BUTTON_SCENE_1 + 3, 0x000)
-        self._pad.set(BUTTON_SCENE_1 + 4,
-                      0x030 if project.quantum < 8 else 0x000)
-        self._pad.set(BUTTON_SCENE_1 + 5,
-                      0x030 if project.quantum > 1 else 0x000)
+        for i in range(2, 6):
+            self._pad.set(BUTTON_SCENE_1 + i, 0x000)
         self._pad.set(BUTTON_SCENE_1 + 6,
                       0x030 if project.latency < 24 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 7,
@@ -74,7 +68,8 @@ class Tempo(Padget):
             self._pad.set(i, 0x000)
 
         for i in range(project.quantum):
-            self._pad.set(i + 48, 0x030)
+            self._pad.set(
+                i + 48, 0x130 if engine.uiState.playing and engine.uiState.phase == i else 0x030)
         for i in range(project.quantum, 8):
             self._pad.set(i + 48, 0x000)
 
