@@ -5,6 +5,9 @@
 #include <pybind11/stl.h>
 
 #define SUNVOX_MAIN
+#if defined(__linux__) || defined(linux)
+#include <dlfcn.h>
+#endif
 #include <sunvox.h>
 
 using namespace ableton;
@@ -107,7 +110,7 @@ PYBIND11_MODULE(audio_engine, m)
             sv_send_event(0, track_num * 4 + 3, 128, 0, module, 0, 0);
             sv_unlock_slot(0);
         })
-        .def("setCtls", [](Engine &engine, int module, std::tuple<int, int, int, int> &ctls) {
+        .def("setCtls", [](Engine &engine, int module, const std::tuple<int, int, int, int> &ctls) {
             sv_send_event(0, 0, 0, 0, module, 0x0600, std::get<0>(ctls));
             sv_send_event(0, 0, 0, 0, module, 0x0700, std::get<1>(ctls));
             sv_send_event(0, 0, 0, 0, module, 0x0800, std::get<2>(ctls));

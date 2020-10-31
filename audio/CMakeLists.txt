@@ -36,7 +36,15 @@ if(WIN32 AND MSVC)
   endif()
   configure_file(${sunvox_dll} ${PROJECT_SOURCE_DIR}/../sunvox.dll COPYONLY)
 
-#elseif("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+  execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
+  if("${ARCHITECTURE}" STREQUAL "armv7l")
+    set(ARCHITECTURE "arm_armhf_raspberry_pi")
+  endif()
+  message(STATUS "Copying sunvox DLL (${ARCHITECTURE})")
+  configure_file(modules/sunvox_dll/linux/lib_${ARCHITECTURE}/sunvox.so ${PROJECT_SOURCE_DIR}/../sunvox.so COPYONLY)
 
 else()
   message(FATAL_ERROR "Unsupported platform")
