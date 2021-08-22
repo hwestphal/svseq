@@ -27,7 +27,7 @@ PYBIND11_MODULE(audio_engine, m)
 {
     using namespace pybind11;
 
-    m.def("init_sunvox", [](list instruments) {
+    m.def("init_sunvox", [](list instruments, int vol) {
         if (sv_load_dll())
         {
             exit(1);
@@ -60,7 +60,7 @@ PYBIND11_MODULE(audio_engine, m)
                 sv_load_module_from_memory(0, 0, 0, 0, 0, 0);
             }
         }
-        sv_volume(0, 256);
+        sv_volume(0, vol);
     });
 
     class_<Engine>(m, "Engine")

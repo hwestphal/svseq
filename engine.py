@@ -187,6 +187,6 @@ for ms in zip_longest(modules('melody'), modules('percussion')):
     for m in ms:
         instruments.append(m or '')
 
-audio_engine.init_sunvox(instruments)
+audio_engine.init_sunvox(instruments, 128)
 
 engine = Engine()
