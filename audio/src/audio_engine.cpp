@@ -18,10 +18,11 @@ struct Engine
     Link link;
     AudioPlatform audioPlatform;
 
-    Engine(double tempo, double quantum, std::chrono::microseconds latency) : link(tempo), audioPlatform(link)
+    Engine(double tempo, double quantum, double swing, std::chrono::microseconds latency) : link(tempo), audioPlatform(link)
     {
         link.enable(true);
         audioPlatform.mEngine.setQuantum(quantum);
+        audioPlatform.mEngine.setSwing(swing);
         audioPlatform.mEngine.setLatency(latency);
     }
 };
@@ -67,7 +68,7 @@ PYBIND11_MODULE(audio_engine, m)
     });
 
     class_<Engine>(m, "Engine")
-        .def(init<double, double, std::chrono::microseconds>())
+        .def(init<double, double, double, std::chrono::microseconds>())
         .def("start", [](Engine &engine, bool metronome) {
             engine.audioPlatform.mEngine.startPlaying(metronome);
         })
@@ -83,6 +84,9 @@ PYBIND11_MODULE(audio_engine, m)
         })
         .def("setQuantum", [](Engine &engine, double quantum) {
             engine.audioPlatform.mEngine.setQuantum(quantum);
+        })
+        .def("setSwing", [](Engine &engine, double swing) {
+            engine.audioPlatform.mEngine.setSwing(swing);
         })
         .def("getState", [](Engine &engine) {
             auto time = engine.link.clock().micros() + engine.audioPlatform.mEngine.latency();

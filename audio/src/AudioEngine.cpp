@@ -82,6 +82,17 @@ void AudioEngine::setLatency(std::chrono::microseconds latency)
     mSharedEngineData.latency = latency;
 }
 
+double AudioEngine::swing() const
+{
+    return mSharedEngineData.swing;
+}
+
+void AudioEngine::setSwing(double swing)
+{
+    std::lock_guard<std::mutex> lock(mEngineDataGuard);
+    mSharedEngineData.swing = swing;
+}
+
 void AudioEngine::setEvents(std::vector<std::tuple<int, int, int, int, int, int>> &events)
 {
     std::lock_guard<std::mutex> lock(mEngineDataGuard);
@@ -116,6 +127,8 @@ AudioEngine::EngineData AudioEngine::pullEngineData()
 
         engineData.latency = mSharedEngineData.latency;
 
+        engineData.swing = mSharedEngineData.swing;
+
         engineData.events = mSharedEngineData.events;
 
         engineData.metronome = mSharedEngineData.metronome;
@@ -128,6 +141,7 @@ AudioEngine::EngineData AudioEngine::pullEngineData()
 
 void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
                                      const double quantum,
+                                     const double swing,
                                      const std::vector<std::tuple<int, int, int, int, int, int>> &events,
                                      const std::chrono::microseconds beginHostTime,
                                      const uint32_t beginTicks,
@@ -143,6 +157,7 @@ void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
     for (;;)
     {
         const auto timeAtBeat = sessionState.timeAtBeat(beat / 4., quantum);
+        const auto swingTimeAtBeat = (beat % 2) == 1 ? sessionState.timeAtBeat((beat + swing) / 4., quantum) : timeAtBeat;
 
         if (timeAtBeat >= maxTime)
         {
@@ -157,7 +172,7 @@ void AudioEngine::createSunvoxEvents(const Link::SessionState sessionState,
 
             sv_lock_slot(0);
 
-            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((timeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6)));
+            sv_set_event_t(0, 1, beginTicks + uint32_t(round(((swingTimeAtBeat - beginHostTime).count() * ticksPerSecond) / 1e6)));
             for (auto const &e : events)
             {
                 sv_send_event(0, std::get<0>(e), std::get<1>(e) & 0xff, std::get<2>(e), std::get<3>(e), std::get<4>(e), std::get<5>(e));
@@ -306,7 +321,7 @@ void AudioEngine::audioCallback(
     if (mIsPlaying)
     {
         // As long as the engine is playing, generate sunvox events at the appropriate beats.
-        createSunvoxEvents(sessionState, engineData.quantum, engineData.events, hostTime, ticks, numSamples);
+        createSunvoxEvents(sessionState, engineData.quantum, engineData.swing, engineData.events, hostTime, ticks, numSamples);
     }
     sv_audio_callback(buffer, numSamples, 0, ticks);
 

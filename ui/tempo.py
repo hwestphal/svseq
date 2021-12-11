@@ -24,6 +24,12 @@ class Tempo(Padget):
         if i == BUTTON_SCENE_1+1 and project.tempo >= 50:
             project.tempo -= 10
             return True
+        if i == BUTTON_SCENE_1+4 and project.swing < 24:
+            project.swing += 1
+            return True
+        if i == BUTTON_SCENE_1+5 and project.swing > 0:
+            project.swing -= 1
+            return True
         if i == BUTTON_SCENE_1+6 and project.latency < 24:
             project.latency += 1
             return True
@@ -40,8 +46,12 @@ class Tempo(Padget):
         self._pad.set(BUTTON_SCENE_1, 0x030 if project.tempo <= 230 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 1,
                       0x030 if project.tempo >= 50 else 0x000)
-        for i in range(2, 6):
+        for i in range(2, 4):
             self._pad.set(BUTTON_SCENE_1 + i, 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 4,
+                      0x030 if project.swing < 24 else 0x000)
+        self._pad.set(BUTTON_SCENE_1 + 5,
+                      0x030 if project.swing > 0 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 6,
                       0x030 if project.latency < 24 else 0x000)
         self._pad.set(BUTTON_SCENE_1 + 7,
@@ -66,6 +76,13 @@ class Tempo(Padget):
 
         for i in range(40, 48):
             self._pad.set(i, 0x000)
+
+        c, v = _to_column_and_value(project.swing)
+        for i in range(c):
+            self._pad.set(i + 40, 0x003)
+        self._pad.set(c + 40, 0x001 * v)
+        for i in range(c + 1, 8):
+            self._pad.set(i + 40, 0x000)
 
         for i in range(project.quantum):
             self._pad.set(

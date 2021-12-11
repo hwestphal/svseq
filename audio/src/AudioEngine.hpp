@@ -40,6 +40,8 @@ public:
     void setQuantum(double quantum);
     std::chrono::microseconds latency() const;
     void setLatency(std::chrono::microseconds latency);
+    double swing() const;
+    void setSwing(double swing);
     void setEvents(std::vector<std::tuple<int, int, int, int, int, int>> &events);
 
 private:
@@ -50,6 +52,7 @@ private:
         bool requestStop;
         double quantum;
         std::chrono::microseconds latency;
+        double swing;
         std::vector<std::tuple<int, int, int, int, int, int>> events;
         bool metronome;
     };
@@ -62,6 +65,7 @@ private:
                        float *buffer);
     void createSunvoxEvents(Link::SessionState sessionState,
                             double quantum,
+                            double swing,
                             const std::vector<std::tuple<int, int, int, int, int, int>> &events,
                             std::chrono::microseconds beginHostTime,
                             uint32_t beginTicks,

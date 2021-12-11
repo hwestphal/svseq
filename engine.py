@@ -18,11 +18,12 @@ class Engine:
         self.tick = 0
         self.pattern: List[Optional[int]] = [None] * 8
         self.audioEngine = audio_engine.Engine(
-            project.tempo, project.quantum, timedelta(milliseconds=project.latency * 7))
+            project.tempo, project.quantum, project.swing / 48, timedelta(milliseconds=project.latency * 7))
         self.defaultCtls = self.audioEngine.getCtls()
         self.__tempo_changed()
         self.__latency_changed()
         self.__quantum_changed()
+        self.__swing_changed()
 
     def startOrStopPattern(self, track: int, pattern: int, record: bool) -> None:
         if not self.playing:
@@ -158,6 +159,10 @@ class Engine:
     @render
     def __quantum_changed(self) -> None:
         self.audioEngine.setQuantum(project.quantum)
+
+    @render
+    def __swing_changed(self) -> None:
+        self.audioEngine.setSwing(project.swing / 48)
 
     def __reset_ctls(self) -> None:
         for track in project.tracks:
