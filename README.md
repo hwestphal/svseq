@@ -2,6 +2,10 @@
 
 `svseq` is a simple pattern based step sequencer built around the [Novation Launchpad MK1](https://resource.novationmusic.com/support/product-downloads?product=Launchpad+MK1) and the [Sunvox sound engine](https://www.warmplace.ru/soft/sunvox/). It supports the [Ableton Link protocol](https://www.ableton.com/de/link/) and will synchronize automatically with other Link enabled applications.
 
+## Screenshots
+
+![Screenshots](screenshots.jpg)
+
 ## Prerequisites
 
 - [Pipenv](https://pipenv.pypa.io/)
