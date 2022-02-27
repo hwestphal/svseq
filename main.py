@@ -3,14 +3,18 @@ from ui import App
 from project import project
 from engine import engine
 
-import pygame.time
+import pygame
 from mopyx import action
 
 
 PROJECT_FILE = 'project.json'
 
+pygame.init()
+pygame.midi.init()
+
 clock = pygame.time.Clock()
-pad = Launchpad()
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+pad = Launchpad(screen)
 
 try:
     project.load(PROJECT_FILE)
@@ -41,8 +45,11 @@ try:
 
     while process():
         pad.refresh()
+        pygame.event.clear()
+        pygame.display.flip()
         clock.tick(60)
 
 finally:
     pad.close()
     project.dump(PROJECT_FILE)
+    pygame.quit()
