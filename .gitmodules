@@ -3,7 +3,7 @@
 	url = https://github.com/Ableton/link.git
 [submodule "audio/modules/portaudio"]
 	path = audio/modules/portaudio
-	url = https://git.assembla.com/portaudio.git
+	url = https://github.com/PortAudio/portaudio.git
 [submodule "audio/modules/sunvox_dll"]
 	path = audio/modules/sunvox_dll
 	url = https://github.com/warmplace/sunvox_dll.git
