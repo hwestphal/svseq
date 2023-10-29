@@ -4,9 +4,6 @@
 [submodule "audio/modules/portaudio"]
 	path = audio/modules/portaudio
 	url = https://github.com/PortAudio/portaudio.git
-[submodule "audio/modules/sunvox_dll"]
-	path = audio/modules/sunvox_dll
-	url = https://github.com/warmplace/sunvox_dll.git
 [submodule "audio/modules/pybind11"]
 	path = audio/modules/pybind11
 	url = https://github.com/pybind/pybind11.git
