@@ -25,6 +25,13 @@ class Engine:
         self.__quantum_changed()
         self.__swing_changed()
 
+    def initVolume(self) -> None:
+        for track in project.tracks:
+            if track.muted:
+                self.audioEngine.setVolume(track.instrument * 2 + (3 if track.percussion else 2), 0)
+            else:
+                self.audioEngine.setVolume(track.instrument * 2 + (3 if track.percussion else 2), round(track.volume * 0x4000))
+
     def startOrStopPattern(self, track: int, pattern: int, record: bool) -> None:
         if not self.playing:
             self.tick = 0
@@ -105,9 +112,9 @@ class Engine:
             p = self.pattern[i]
             tick = self.tick % (project.quantum * 4)
             note: Optional[Note]
-            if p is not None and not track.muted:
+            if p is not None:
                 note = track.patterns[p].notes[tick]
-            elif p is None and not track.muted and tick == 0:
+            elif p is None and tick == 0:
                 note = Note()
             else:
                 note = None
@@ -127,8 +134,7 @@ class Engine:
                     for c in note.chord:
                         tones.append((tone + c) if c is not None else 128)
                     ctl0 = note.control[0]
-                    vel = round(track.volume *
-                                (ctl0 if ctl0 is not None else 1) * 128) + 1
+                    vel = round(ctl0 * 128) + 1 if ctl0 is not None else 0
                     for j in range(4):
                         ctl = ctls[j]
                         events.append(
@@ -136,8 +142,7 @@ class Engine:
 
                 else:
                     ctl0 = note.control[0]
-                    vel = round(track.volume * ctl0 * 128) + \
-                        1 if ctl0 is not None else 0
+                    vel = round(ctl0 * 128) + 1 if ctl0 is not None else 0
                     for j in range(4):
                         ctl = ctls[j]
                         if tone or ctl is not None or vel:

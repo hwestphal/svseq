@@ -34,9 +34,8 @@ class PercussionPattern(_Pattern):
             else:
                 if engine.recording == (self._tn, self._pn):
                     self.__record(o, engine.tick % 32, False)
-                if not self._track.muted:
-                    engine.audioEngine.sendNotes(
-                        self._tn, 1 + 12 * o, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 3)
+                engine.audioEngine.sendNotes(
+                    self._tn, 1 + 12 * o, 128, 128, 128, 0, self._track.instrument * 2 + 3)
             return True
         if i == 47:
             if self.__pressed is not None:
@@ -149,9 +148,8 @@ class MelodyPattern(_Pattern):
                     n = self._pattern.notes[engine.tick % 32]
                     n.tone = tone
                     n.chord = (None, None, None)
-                if not self._track.muted:
-                    engine.audioEngine.sendNotes(
-                        self._tn, tone, 128, 128, 128, round(self._track.volume * 128) + 1, self._track.instrument * 2 + 2)
+                engine.audioEngine.sendNotes(
+                    self._tn, tone, 128, 128, 128, 0, self._track.instrument * 2 + 2)
             return True
         return False
 

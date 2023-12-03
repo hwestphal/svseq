@@ -149,9 +149,12 @@ class Preset(Padget):
 
     def _buttonPressed(self, i: int) -> bool:
         if i < 64 and not self.__in_use(i):
-            engine.audioEngine.sendNoteOff(
-                self.__i, self.__track.instrument * 2 + (3 if self.__track.percussion else 2))
+            engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), 0)
             self.__track.instrument = i
+            if self.__track.muted:
+                engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), 0)
+            else:
+                engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
             return True
         return False
 

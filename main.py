@@ -18,6 +18,7 @@ pad = Launchpad(screen)
 
 try:
     project.load(PROJECT_FILE)
+    engine.initVolume()
     clock.tick(1)
     app = App(pad)
     app.renderUi()
