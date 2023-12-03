@@ -1,9 +1,12 @@
 import math
 import pygame.draw
+import pygame.event
 import pygame.font
 import pygame.midi
+from pygame.locals import *
 from pygame.surface import Surface
 from typing import Generator, Tuple, List
+import sys
 
 
 BUTTON_SCENE_1 = 64
@@ -20,6 +23,17 @@ BUTTON_MIXER = 79
 FAST_MODE = False
 BLINK_PERIOD = 10
 LABELS = ["U", "D", "L", "R", "S", "U1", "U2", "M"]
+
+
+class NoopMidi:
+    def poll(self) -> bool:
+        return False
+
+    def write_short(self, status: int, data1=0, data2=0) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
 
 
 class Launchpad:
@@ -48,14 +62,17 @@ class Launchpad:
                 elif output and midiOut is None:
                     midiOut = i
         if midiIn is None or midiOut is None:
-            raise RuntimeError(f'Cannot connect to "{id.decode()}"')
-        self.__midiIn = pygame.midi.Input(midiIn)
-        self.__midiOut = pygame.midi.Output(midiOut)
+            print(f'Cannot connect to "{id.decode()}"', file=sys.stderr)
+            self.__midiIn = self.__midiOut = NoopMidi()
+        else:
+            self.__midiIn = pygame.midi.Input(midiIn)
+            self.__midiOut = pygame.midi.Output(midiOut)
         self.__midiOut.write_short(0xb0, 0x00, 0x00)
         self.__midiOut.write_short(0xb0, 0x00, 0x28)
         self.__current = [0x04] * 80
         self.__work = [0x04] * 80
         self.__pressed = [False] * 80
+        self.__mouse = [None, None, None]
 
     def close(self) -> None:
         self.__midiOut.write_short(0xb0, 0x00, 0x00)
@@ -77,6 +94,28 @@ class Launchpad:
             elif c == 0xb0:
                 self.__pressed[i - 32] = True if v else False
                 yield i - 32, v
+
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONDOWN and event.button in (1, 2, 3):
+                x, y, d, _ = self.__dims
+                i = (event.pos[0] - x) // d
+                j = (event.pos[1] - y) // d - 1
+                if i >= 0 and i < 9 and j >= 0 and j < 9 and (i != 8 or j != 0):
+                    if i < 8 and j > 0:
+                        k = (j - 1) * 8 + i
+                    elif j == 0:
+                        k = BUTTON_UP + i
+                    else:
+                        k = BUTTON_SCENE_1 + j - 1
+                    self.__mouse[event.button - 1] = k
+                    self.__pressed[k] = True
+                    yield k, 127
+            elif event.type == MOUSEBUTTONUP and event.button in (1, 2, 3):
+                i = self.__mouse[event.button - 1]
+                if i is not None:
+                    self.__mouse[event.button - 1] = None
+                    self.__pressed[i] = False
+                    yield i, 0
 
     def set(self, i: int, v: int) -> None:
         if i < 80:

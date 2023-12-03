@@ -45,7 +45,6 @@ try:
 
     while process():
         pad.refresh()
-        pygame.event.clear()
         pygame.display.flip()
         clock.tick(60)
 
