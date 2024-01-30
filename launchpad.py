@@ -3,9 +3,9 @@ import pygame.draw
 import pygame.event
 import pygame.font
 import pygame.midi
-from pygame.locals import *
+from pygame import locals
 from pygame.surface import Surface
-from typing import Generator, Tuple, List
+from typing import cast, Generator, Tuple, List, Optional
 import sys
 
 
@@ -26,13 +26,16 @@ LABELS = ["U", "D", "L", "R", "S", "U1", "U2", "M"]
 
 
 class NoopMidi:
-    def poll(self) -> bool:
+    def poll(self):
         return False
 
-    def write_short(self, status: int, data1=0, data2=0) -> None:
+    def read(self, num_events: int):
+        raise
+
+    def write_short(self, status: int, data1=0, data2=0):
         pass
 
-    def close(self) -> None:
+    def close(self):
         pass
 
 
@@ -72,7 +75,7 @@ class Launchpad:
         self.__current = [0x04] * 80
         self.__work = [0x04] * 80
         self.__pressed = [False] * 80
-        self.__mouse = [None, None, None]
+        self.__mouse: List[Optional[int]] = [None, None, None]
 
     def close(self) -> None:
         self.__midiOut.write_short(0xb0, 0x00, 0x00)
@@ -81,7 +84,7 @@ class Launchpad:
 
     def poll(self) -> Generator[Tuple[int, int], None, None]:
         while self.__midiIn.poll():
-            c, i, v, _ = self.__midiIn.read(1)[0][0]
+            c, i, v, _ = cast(List[int], self.__midiIn.read(1)[0][0])
             if c == 0x90:
                 r = i // 16
                 i = i % 16
@@ -96,7 +99,7 @@ class Launchpad:
                 yield i - 32, v
 
         for event in pygame.event.get():
-            if event.type == MOUSEBUTTONDOWN and event.button in (1, 2, 3):
+            if event.type == locals.MOUSEBUTTONDOWN and event.button in (1, 2, 3):
                 x, y, d, _ = self.__dims
                 i = (event.pos[0] - x) // d
                 j = (event.pos[1] - y) // d - 1
@@ -110,7 +113,7 @@ class Launchpad:
                     self.__mouse[event.button - 1] = k
                     self.__pressed[k] = True
                     yield k, 127
-            elif event.type == MOUSEBUTTONUP and event.button in (1, 2, 3):
+            elif event.type == locals.MOUSEBUTTONUP and event.button in (1, 2, 3):
                 i = self.__mouse[event.button - 1]
                 if i is not None:
                     self.__mouse[event.button - 1] = None
@@ -181,7 +184,8 @@ class Launchpad:
                 c = (32, 32, 32)
             pygame.draw.circle(screen, c, r, di/2)
             if self.__pressed[i + 64]:
-                pygame.draw.rect(screen, (0, 0, 255), (r[0] - di/2, r[1] - di/2, di/3, di/3))
+                pygame.draw.rect(screen, (0, 0, 255),
+                                 (r[0] - di/2, r[1] - di/2, di/3, di/3))
             screen.blit(self.__labels[i + 8], (r[0] + d - di/3, r[1] - di/4))
         for i in range(8):
             v = self.__work[i + 72]
@@ -192,6 +196,7 @@ class Launchpad:
                 c = (32, 32, 32)
             pygame.draw.circle(screen, c, r, di/2)
             if self.__pressed[i + 72]:
-                pygame.draw.rect(screen, (0, 0, 255), (r[0] - di/2, r[1] - di/2, di/3, di/3))
+                pygame.draw.rect(screen, (0, 0, 255),
+                                 (r[0] - di/2, r[1] - di/2, di/3, di/3))
             screen.blit(self.__labels[i], (r[0] - di/4, r[1] - d))
         self.__frame = (self.__frame + 1) % (BLINK_PERIOD * 2)

@@ -4,6 +4,7 @@ from project import project
 from engine import engine
 
 import pygame
+import pygame.midi
 from mopyx import action
 
 

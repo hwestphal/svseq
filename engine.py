@@ -28,9 +28,11 @@ class Engine:
     def initVolume(self) -> None:
         for track in project.tracks:
             if track.muted:
-                self.audioEngine.setVolume(track.instrument * 2 + (3 if track.percussion else 2), 0)
+                self.audioEngine.setVolume(
+                    track.instrument * 2 + (3 if track.percussion else 2), 0)
             else:
-                self.audioEngine.setVolume(track.instrument * 2 + (3 if track.percussion else 2), round(track.volume * 0x4000))
+                self.audioEngine.setVolume(
+                    track.instrument * 2 + (3 if track.percussion else 2), round(track.volume * 0x4000))
 
     def startOrStopPattern(self, track: int, pattern: int, record: bool) -> None:
         if not self.playing:

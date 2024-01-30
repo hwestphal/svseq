@@ -24,7 +24,8 @@ class ChordsAndTrigger(Padget):
             elif not engine.playing:
                 tone = 1 + self.__pattern.octave * 12
                 chord = _chords[i - 40]
-                engine.audioEngine.sendNotes(self.__tn, tone, tone + chord[0], tone + chord[1], (tone + chord[2]) if chord[2] is not None else 128, 0, self.__track.instrument * 2 + 2)
+                engine.audioEngine.sendNotes(self.__tn, tone, tone + chord[0], tone + chord[1], (
+                    tone + chord[2]) if chord[2] is not None else 128, 0, self.__track.instrument * 2 + 2)
             return True
         if i >= 48 and i < 50:
             if self.__pressed is not None:

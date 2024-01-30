@@ -1,12 +1,13 @@
 from launchpad import Launchpad
 
 from mopyx import action, render, model
-from typing import Callable, Any
+from typing import cast, Callable, Any
+
+model = cast(Callable[[type], type], model)
 
 
 @model
 class Padget:
-
     def __init__(self, pad: Launchpad):
         self._pad = pad
 

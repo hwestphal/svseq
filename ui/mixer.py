@@ -29,9 +29,11 @@ class Track(Padget):
         if i == BUTTON_SCENE_1 + self.__i:
             self.__track.muted = not self.__track.muted
             if self.__track.muted:
-                engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), 0)
+                engine.audioEngine.setVolume(
+                    self.__track.instrument * 2 + (3 if self.__track.percussion else 2), 0)
             else:
-                engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
+                engine.audioEngine.setVolume(self.__track.instrument * 2 + (
+                    3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
             return True
         if i >= self.__i * 8 and i < (self.__i + 1) * 8:
             i -= self.__i * 8
@@ -41,7 +43,8 @@ class Track(Padget):
             else:
                 self.__track.volume = _from_column_and_value(i, (v-1) % 4)
             if not self.__track.muted:
-                engine.audioEngine.setVolume(self.__track.instrument * 2 + (3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
+                engine.audioEngine.setVolume(self.__track.instrument * 2 + (
+                    3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
             return True
         return False
 
