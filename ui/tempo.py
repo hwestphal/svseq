@@ -1,9 +1,11 @@
-from launchpad import Launchpad, BUTTON_LEFT, BUTTON_SCENE_1, BUTTON_UP, BUTTON_DOWN
-from project import project
-from engine import engine
-from .padget import Padget
-
 from typing import List, Tuple
+
+from engine import engine
+from launchpad import (BUTTON_DOWN, BUTTON_LEFT, BUTTON_SCENE_1, BUTTON_UP,
+                       Launchpad)
+from project import project
+
+from .padget import Padget
 
 
 class Tempo(Padget):

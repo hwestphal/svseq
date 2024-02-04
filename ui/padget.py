@@ -1,7 +1,8 @@
-from launchpad import Launchpad
+from typing import Any, Callable, cast
 
-from mopyx import action, render, model
-from typing import cast, Callable, Any
+from mopyx import action, model, render
+
+from launchpad import Launchpad
 
 model = cast(Callable[[type], type], model)
 

@@ -1,9 +1,10 @@
-from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SCENE_1
-from project import project
-from engine import engine
-from .padget import Padget
-
 from typing import List, Tuple
+
+from engine import engine
+from launchpad import BUTTON_MIXER, BUTTON_SCENE_1, Launchpad
+from project import project
+
+from .padget import Padget
 
 
 class Mixer(Padget):

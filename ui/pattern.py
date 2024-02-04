@@ -1,10 +1,13 @@
-from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN, BUTTON_RIGHT
-from project import project
 from engine import engine
-from .padget import Padget
-from .notes import PercussionPattern, MelodyPattern
-from .controller import Controller
+from launchpad import (BUTTON_DOWN, BUTTON_RIGHT, BUTTON_SCENE_1,
+                       BUTTON_SESSION, BUTTON_UP, BUTTON_USER_1, BUTTON_USER_2,
+                       Launchpad)
+from project import project
+
 from .chords import ChordsAndTrigger
+from .controller import Controller
+from .notes import MelodyPattern, PercussionPattern
+from .padget import Padget
 
 
 class Pattern(Padget):

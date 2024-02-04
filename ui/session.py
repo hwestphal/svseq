@@ -1,11 +1,14 @@
-from launchpad import Launchpad, BUTTON_SESSION, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
-from project import project
-from engine import engine
-from .padget import Padget
-from .pattern import Pattern
+from typing import List, Optional
 
 from mopyx import computed
-from typing import Optional, List
+
+from engine import engine
+from launchpad import (BUTTON_DOWN, BUTTON_SCENE_1, BUTTON_SESSION, BUTTON_UP,
+                       BUTTON_USER_1, BUTTON_USER_2, Launchpad)
+from project import project
+
+from .padget import Padget
+from .pattern import Pattern
 
 
 class Session(Padget):

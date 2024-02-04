@@ -1,9 +1,10 @@
-from launchpad import Launchpad, BUTTON_SCENE_1
-from project import Pattern
-from engine import engine
-from .padget import Padget
-
 from typing import Optional, Tuple
+
+from engine import engine
+from launchpad import BUTTON_SCENE_1, Launchpad
+from project import Pattern
+
+from .padget import Padget
 
 
 class Controller(Padget):

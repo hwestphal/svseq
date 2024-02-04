@@ -1,13 +1,13 @@
 import math
+import sys
+from typing import Generator, List, Optional, Tuple, cast
+
 import pygame.draw
 import pygame.event
 import pygame.font
 import pygame.midi
 from pygame import locals
 from pygame.surface import Surface
-from typing import cast, Generator, Tuple, List, Optional
-import sys
-
 
 BUTTON_SCENE_1 = 64
 BUTTON_UP = 72

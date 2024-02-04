@@ -1,11 +1,14 @@
-from launchpad import Launchpad, BUTTON_MIXER, BUTTON_SESSION, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_USER_1, BUTTON_USER_2, BUTTON_UP, BUTTON_DOWN
+from typing import Optional
+
 from engine import engine
-from .padget import Padget
+from launchpad import (BUTTON_DOWN, BUTTON_LEFT, BUTTON_MIXER, BUTTON_RIGHT,
+                       BUTTON_SESSION, BUTTON_UP, BUTTON_USER_1, BUTTON_USER_2,
+                       Launchpad)
+
 from .mixer import Mixer
+from .padget import Padget
 from .session import Session
 from .tempo import Tempo
-
-from typing import Optional
 
 
 class App(Padget):

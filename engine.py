@@ -1,12 +1,13 @@
-from project import project, Note
-import audio_engine
-
-from mopyx import model, action, render
 import os
-from math import floor
 from datetime import timedelta
 from itertools import zip_longest
-from typing import List, Tuple, Optional, Generator
+from math import floor
+from typing import Generator, List, Optional, Tuple
+
+from mopyx import action, model, render
+
+import audio_engine
+from project import Note, project
 
 
 class Engine:

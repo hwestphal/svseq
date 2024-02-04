@@ -1,6 +1,7 @@
-from mopyx import model, computed, action
-from typing import List, Optional, Dict, Any, Tuple, cast, Callable
 import json
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+
+from mopyx import action, computed, model
 
 model = cast(Callable[[type], type], model)
 

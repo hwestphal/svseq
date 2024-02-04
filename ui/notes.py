@@ -1,9 +1,11 @@
-from launchpad import Launchpad, BUTTON_SCENE_1, BUTTON_USER_1, BUTTON_UP, BUTTON_DOWN
-from project import Pattern, Track
-from engine import engine
-from .padget import Padget
+from typing import List, Optional, cast
 
-from typing import Optional, List, cast
+from engine import engine
+from launchpad import (BUTTON_DOWN, BUTTON_SCENE_1, BUTTON_UP, BUTTON_USER_1,
+                       Launchpad)
+from project import Pattern, Track
+
+from .padget import Padget
 
 
 class _Pattern(Padget):

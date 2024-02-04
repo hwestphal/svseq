@@ -1,12 +1,11 @@
-from launchpad import Launchpad, BUTTON_MIXER
-from ui import App
-from project import project
-from engine import engine
-
 import pygame
 import pygame.midi
 from mopyx import action
 
+from engine import engine
+from launchpad import BUTTON_MIXER, Launchpad
+from project import project
+from ui import App
 
 PROJECT_FILE = 'project.json'
 
