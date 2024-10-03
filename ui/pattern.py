@@ -22,7 +22,7 @@ class Pattern(Padget):
         self.__record = False
 
     def _buttonPressed(self, i: int) -> bool:
-        if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
+        if BUTTON_SCENE_1 <= i < BUTTON_SCENE_1 + 8:
             i -= BUTTON_SCENE_1
             if i != self.__scene and i != 2:
                 if i == 0:

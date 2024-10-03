@@ -38,7 +38,7 @@ class Tempo(Padget):
         if i == BUTTON_SCENE_1+7 and project.latency > 0:
             project.latency -= 1
             return True
-        if i >= 48 and i < 56:
+        if 48 <= i < 56:
             project.quantum = i - 47
             return True
         return False

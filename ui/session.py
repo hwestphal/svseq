@@ -36,7 +36,7 @@ class Session(Padget):
                 self.__pattern = None
                 return True
             return False
-        if i >= BUTTON_SCENE_1 and i < BUTTON_SCENE_1 + 8:
+        if BUTTON_SCENE_1 <= i < BUTTON_SCENE_1 + 8:
             self.__tracks.clear()
             self.__preset = Preset(self._pad, i - BUTTON_SCENE_1)
             return True
@@ -122,7 +122,7 @@ class Track(Padget):
         self.__i = i
 
     def _buttonPressed(self, i: int) -> bool:
-        if i >= self.__i * 8 and i < (self.__i + 1) * 8:
+        if self.__i * 8 <= i < (self.__i + 1) * 8:
             i -= self.__i * 8
             if i in self.__track.sequence:
                 self.__track.sequence.remove(i)

@@ -36,7 +36,7 @@ class Track(Padget):
                 engine.audioEngine.setVolume(self.__track.instrument * 2 + (
                     3 if self.__track.percussion else 2), round(self.__track.volume * 0x4000))
             return True
-        if i >= self.__i * 8 and i < (self.__i + 1) * 8:
+        if self.__i * 8 <= i < (self.__i + 1) * 8:
             i -= self.__i * 8
             c, v = _to_column_and_value(self.__track.volume)
             if i != c:
@@ -61,7 +61,7 @@ class Track(Padget):
 
 
 def _to_column_and_value(w: float) -> Tuple[int, int]:
-    v = round(max(min(1, w), 0) * 24)
+    v = round(max(min(1.0, w), 0) * 24)
     if v == 0:
         return 0, 0
     v -= 1

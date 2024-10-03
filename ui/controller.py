@@ -34,7 +34,7 @@ class Controller(Padget):
                     for j in range(s + 1, e):
                         notes[j].control[self.__cn] = (sv or 0) + (j - s) * d
             return True
-        if i >= 32 and i < 64:
+        if 32 <= i < 64:
             if self.__pressed is not None:
                 control = self.__pattern.notes[self.__pressed].control
                 if i == 32:
@@ -90,7 +90,7 @@ class Controller(Padget):
 def _to_column_and_value(w: Optional[float]) -> Tuple[int, int]:
     if w is None:
         return 0, 0
-    v = round(max(min(1, w), 0) * 3 * 31)
+    v = round(max(min(1.0, w), 0) * 3 * 31)
     if v == 0:
         return 0, 0
     v -= 1

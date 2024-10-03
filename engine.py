@@ -4,9 +4,10 @@ from itertools import zip_longest
 from math import floor
 from typing import Generator, List, Optional, Tuple
 
-from mopyx import action, model, render
+from mopyx import action, render
 
 import audio_engine
+from model import model
 from project import Note, project
 
 
@@ -78,7 +79,7 @@ class Engine:
 
         if self.playing:
             tick = (floor(beat * 4) + 1) if beat >= 0 else 0
-            if self.tick == 0 and tick == 1 or self.tick > 0 and tick > self.tick:
+            if self.tick == 0 and tick == 1 or 0 < self.tick < tick:
                 self.tick = tick
                 if tick % (project.quantum * 4) == 0 and self.session:
                     for i in range(8):

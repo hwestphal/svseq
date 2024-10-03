@@ -103,7 +103,7 @@ class Launchpad:
                 x, y, d, _ = self.__dims
                 i = (event.pos[0] - x) // d
                 j = (event.pos[1] - y) // d - 1
-                if i >= 0 and i < 9 and j >= 0 and j < 9 and (i != 8 or j != 0):
+                if 0 <= i < 9 and 0 <= j < 9 and (i != 8 or j != 0):
                     if i < 8 and j > 0:
                         k = (j - 1) * 8 + i
                     elif j == 0:

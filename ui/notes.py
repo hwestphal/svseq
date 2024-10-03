@@ -29,7 +29,7 @@ class PercussionPattern(_Pattern):
         if i < 32 and self.__pressed is None:
             self.__pressed = i
             return True
-        if i >= 40 and i < 47:
+        if 40 <= i < 47:
             o = i - 37
             if self.__pressed is not None:
                 self.__record(o, self.__pressed, True)
@@ -74,7 +74,7 @@ class PercussionPattern(_Pattern):
         if i == self.__pressed:
             self.__pressed = None
             return True
-        if i >= 40 and i < 47 and not engine.playing:
+        if 40 <= i < 47 and not engine.playing:
             engine.audioEngine.sendNoteOff(
                 self._tn, self._track.instrument * 2 + 3)
             return True
@@ -141,7 +141,7 @@ class MelodyPattern(_Pattern):
         if i < 32 and self.__pressed is None:
             self.__pressed = i
             return True
-        if i >= 32 and i < 64:
+        if 32 <= i < 64:
             tone = _to_tone(i-32, self._pattern.octave)
             if self.__pressed is not None:
                 self._pattern.notes[self.__pressed].tone = tone
@@ -162,7 +162,7 @@ class MelodyPattern(_Pattern):
         if i == self.__pressed:
             self.__pressed = None
             return True
-        if i >= 32 and i < 64:
+        if 32 <= i < 64:
             if self.__pressed is None and _to_tone(i-32, self._pattern.octave) > 0:
                 engine.audioEngine.sendNoteOff(
                     self._tn, self._track.instrument * 2 + 2)
