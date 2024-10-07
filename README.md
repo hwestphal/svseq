@@ -8,17 +8,16 @@
 
 ## Prerequisites
 
-- [Pipenv](https://pipenv.pypa.io/)
+- [Python 3.9](https://www.python.org/downloads/)
+- [Poetry](https://python-poetry.org/)
 - [CMake](https://cmake.org/)
 
 ## Build
 
     git clone --recurse-submodules https://gitlab.com/hwestphal/svseq.git
     cd svseq
-    pipenv install --dev
-    cd audio
-    pipenv run python setup.py build_ext --inplace
-    cd ..
+    poetry install
+    (cd audio && poetry run python setup.py build_ext --inplace)
 
 ## Prepare instruments
 
@@ -28,4 +27,4 @@ All instruments should be bundled as meta-modules exposing appropriate controls 
 
 ## Run
 
-    pipenv run python main.py
+    poetry run python main.py

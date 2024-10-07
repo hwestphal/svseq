@@ -9,6 +9,6 @@ build:
   script:
     - apt-get -qq -y update
     - apt-get -qq -y install cmake libasound2-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev
-    - pip install pipenv
-    - pipenv install --dev
-    - (cd audio && pipenv run python setup.py build_ext --inplace)
+    - pip install poetry
+    - poetry install
+    - (cd audio && poetry run python setup.py build_ext --inplace)
