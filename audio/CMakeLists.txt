@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 function(configure_sunvox sunvox_lib_path_OUT)
   set(sunvox_download_root "https://warmplace.ru/soft/sunvox")
-  set(sunvox_file_name "sunvox_lib-2.1.1.zip")
+  set(sunvox_file_name "sunvox_lib-2.1.1c.zip")
   set(sunvox_working_dir "${CMAKE_BINARY_DIR}/modules")
   set(sunvox_output_path "${sunvox_working_dir}/${sunvox_file_name}")
   message(STATUS "Downloading sunvox")
